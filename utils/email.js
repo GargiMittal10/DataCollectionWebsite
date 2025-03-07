@@ -17,7 +17,7 @@ async function sendCredentials(email, username, password) {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Your Faculty Login Credentials",
-        text: `Hello,\n\nYour login credentials are:\nUsername: ${username}\nPassword: ${password}\n\nPlease change your password after logging in.\n\nRegards,\nAdmin Team`,
+        text: `Hello,\n\nYour login credentials are:\nUsername: ${username}\nPassword: ${password}\n\nPlease change your password after logging in.\n\nRegards,\nAdmin Team,`
     };
 
     try {

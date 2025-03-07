@@ -24,7 +24,13 @@
         <div class="container-fluid">
           <nav class="navbar navbar-expand-lg custom_nav-container">
             <a class="navbar-brand" href="/coordinatordash">
-              <span>SCHS LOGO</span>
+              <span
+                ><img
+                  src="/images/symbilogo.jpg"
+                  alt="Logo"
+                  class="logo"
+                  style="width: 50px; height: auto"
+              /></span>
             </a>
             <button
               class="navbar-toggler"
@@ -48,12 +54,11 @@
                   <a class="nav-link" href="/addfaculty">Add Faculty Data</a>
                 </li> -->
                 <li class="nav-item">
-                  <a class="nav-link" href="/viewfacultyadmin">Faculty List</a>
+                  <a class="nav-link" href="/admindash">Home</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="/admin">Back</a>
+                  <a class="nav-link" href="/viewfacultyadmin">Faculty List</a>
                 </li>
-                
               </ul>
             </div>
           </nav>
@@ -83,31 +88,33 @@
         </form>
       </div>
     </section>
-    
+
     <script>
-      document.getElementById("facultyUploadForm").addEventListener("submit", async function(event) {
-        event.preventDefault(); // Prevent page reload
-    
-        const formData = new FormData(this);
-    
-        try {
-          const response = await fetch("/upload-faculty", {
-            method: "POST",
-            body: formData
-          });
-    
-          const result = await response.text();
-    
-          if (response.ok) {
-            alert("✅ Upload submitted successfully!");
-          } else {
-            alert("❌ Error: " + result);
+      document
+        .getElementById("facultyUploadForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault(); // Prevent page reload
+
+          const formData = new FormData(this);
+
+          try {
+            const response = await fetch("/upload-faculty", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.text();
+
+            if (response.ok) {
+              alert("✅ Upload submitted successfully!");
+            } else {
+              alert("❌ Error: " + result);
+            }
+          } catch (error) {
+            alert("❌ Network error, please try again.");
+            console.error("Upload error:", error);
           }
-        } catch (error) {
-          alert("❌ Network error, please try again.");
-          console.error("Upload error:", error);
-        }
-      });
+        });
     </script>
 
     <!-- Corrected JS paths -->

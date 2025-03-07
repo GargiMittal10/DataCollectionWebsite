@@ -1,83 +1,141 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Admin Dashboard - Faculty Student Mapping</title>
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+          <!-- Site Metas -->
+          <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+          <meta name="keywords" content="" />
+          <meta name="description" content="" />
+          <meta name="author" content="" />
+      
+          <title>Mapping</title>
+      
+      <!-- CSS Links -->
+      <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+      <link href="/css/font-awesome.min.css" rel="stylesheet" />
+      <link href="/css/style.css" rel="stylesheet" />
+      <link href="/css/responsive.css" rel="stylesheet" />
 
-    <!-- Corrected CSS Paths -->
-    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
-    <link href="/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="/css/style.css" rel="stylesheet" />
-    <link href="/css/responsive.css" rel="stylesheet" />
-  </head>
-  <body class="sub_page">
-    <div class="hero_area">
-      <header class="header_section">
-        <div class="container-fluid">
-          <nav class="navbar navbar-expand-lg custom_nav-container">
-            <a class="navbar-brand" href="/coordinatordash">
-              <span></span>
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav ml-auto">
-                <li class="nav-item"><a class="nav-link" href="/coordinatordash">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="/addfaculty">Add Faculty Data</a></li>
-                <li class="nav-item"><a class="nav-link" href="/addstudent">Add Student Data</a></li>
-                <li class="nav-item"><a class="nav-link" href="/mapping">Student and Faculty mapping</a></li>
-              </ul>
-            </div>
-          </nav>
-        </div>
-      </header>
-    </div>
-
-    <section class="admin_section layout_padding">
-      <div class="container">
-        <div class="heading_container">
-          <h2>Map Faculty to Students</h2>
-        </div>
-        <form action="/submit-mapping" method="post" enctype="multipart/form-data" class="form-style">
-          <div class="form-group">
-            <label for="facultyId">Faculty ID</label>
-            <input type="text" class="form-control" id="facultyId" name="facultyId" required />
+      <style>
+        body { background-color: #121212; color: white; }
+        .container { margin-top: 50px; max-width: 600px; }
+        .btn-container { margin-top: 20px; }
+        .info-box { background: #1e1e1e; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+      </style>
+    </head>
+    <body class="sub_page">
+      <div class="hero_area">
+        <header class="header_section">
+          <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg custom_nav-container">
+              <a class="navbar-brand" href="/coordinatordash">
+                <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+              </a>
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                <span class=""></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                  <li class="nav-item"><a class="nav-link" href="/coordinatordash">Home</a></li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="addDropdown" role="button" data-toggle="dropdown">Add Data</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
+                      <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                    </div>
+                  </li>
+                  <li id="mappingBtn" class="nav-item"><a class="nav-link" href="/mapping">Mapping</a></li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="viewsDropdown" role="button" data-toggle="dropdown">Views</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="/viewstudent">View Students</a>
+                      <a class="dropdown-item" href="/viewfacultycoord">View Faculty</a>
+                      <a class="dropdown-item" href="/viewmapping">View Mapping</a>
+                    </div>
+                  </li>
+                  <li id="downloadBtn" class="nav-item"><a class="nav-link" href="/download-excel">Download Format</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/update-questionaire">Update Questionaire</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#" onclick="confirmLogout()">Logout</a></li>
+                </ul>
+              </div>
+            </nav>
           </div>
+        </header>
+      </div>
+
+      <div class="container">
+        <h2>Upload Excel Sheet For Mapping</h2>
+        <div class="info-box">
+          <p><strong>Instructions:</strong></p>
+          <ul>
+            <li>Upload an Excel file (.xls or .xlsx) containing faculty-student mapping.</li>
+            <li>Ensure the file follows the correct format.</li>
+            <li>You can download the correct format <a href="/download-excel" style="color: lightblue;">here</a>.</li>
+          </ul>
+        </div>
+
+        <form id="uploadForm" action="/submit-mapping" method="post" enctype="multipart/form-data">
           <div class="form-group">
-            <label for="studentFile">Upload Student List (Excel)</label>
+            <label for="studentFile">Select Excel File</label>
             <input type="file" class="form-control" id="studentFile" name="studentFile" accept=".xls,.xlsx" required />
           </div>
-          <div class="form-group">
-            <label>Select Forms Accessible:</label><br />
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="forms[]" value="Form 1" id="form1" />
-              <label class="form-check-label" for="form1">Form 1</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="forms[]" value="Form 2" id="form2" />
-              <label class="form-check-label" for="form2">Form 2</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="forms[]" value="Form 3" id="form3" />
-              <label class="form-check-label" for="form3">Form 3</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="forms[]" value="Form 4" id="form4" />
-              <label class="form-check-label" for="form4">Form 4</label>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary">Upload File</button>
         </form>
       </div>
-    </section>
+      
+      <!-- Scripts -->
+      <script src="/js/jquery-3.4.1.min.js"></script>
+      <script src="/js/bootstrap.js"></script>
+      <script>
+        $(document).ready(function () {
+          $("#uploadForm").submit(function (event) {
+            event.preventDefault(); // Prevent normal form submission
 
-    <!-- Corrected JS Paths -->
-    <script src="/js/jquery-3.4.1.min.js"></script>
-    <script src="/js/bootstrap.js"></script>
-    <script src="/js/custom.js"></script>
-  </body>
-</html>
+            var formData = new FormData(this);
+
+            $.ajax({
+              url: "/submit-mapping",
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                alert("✅ Mapping uploaded successfully!");
+                location.reload(); // Refresh page after success
+              },
+              error: function (xhr) {
+                if (xhr.responseJSON) {
+  let errorMsg = "⚠ Some errors found in the uploaded file:\n";
+
+  if (xhr.responseJSON.missingFaculty?.length > 0) {
+    errorMsg += "\n❌ Missing Faculty IDs:\n" + xhr.responseJSON.missingFaculty.join(", ");
+  }
+
+  if (xhr.responseJSON.missingStudents?.length > 0) {
+    errorMsg += "\n❌ Missing Student IDs:\n" + xhr.responseJSON.missingStudents.join(", ");
+  }
+
+  if (xhr.responseJSON.missingSkills?.length > 0) {
+    errorMsg += "\n❌ Missing Skill IDs:\n" + xhr.responseJSON.missingSkills.join(", ");
+  }
+
+  alert(errorMsg || "❌ Error uploading file. Please check the format and try again.");
+}
+
+              }
+            });
+          });
+        });
+      </script>
+      <script>
+        function confirmLogout() {
+          if (confirm("Are you sure you want to logout?")) {
+            window.location.href = "/logout";
+          }
+        }
+      </script>
+    </body>
+  </html>

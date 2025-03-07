@@ -134,6 +134,19 @@ a:focus {
   font-size: 24px;
   text-transform: uppercase;
 }
+.navbar-nav .nav-link {
+  text-transform: uppercase;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #f8d210 !important; /* Change to any preferred hover color */
+  transition: color 0.3s ease-in-out;
+}
+
+.logged-in-info:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.3s ease-in-out;
+}
 
 .custom_nav-container {
   padding: 10px 0;
@@ -181,7 +194,7 @@ a:focus {
   transition: all 0.3s;
 }
 .form-group{
-  color: #ffffff
+  color: #020230
 }
 
 .custom_nav-container .navbar-toggler span::before, .custom_nav-container .navbar-toggler span::after {
@@ -335,7 +348,7 @@ a:focus {
   display: inline-block;
   padding: 10px 15px;
   background-color: #ff4646;
-  color: #ffffff;
+  color: hsl(0, 0%, 100%);
   border-radius: 5px;
   border: 1px solid #ff4646;
   -webkit-transition: all .3s;
@@ -1049,4 +1062,23 @@ a:focus {
 
 .faculty-access-page {
   background-color: #020230; /* Adjust the color */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #020230; /* Slightly lighter than body for contrast */
+  color: white; /* Ensures text inside the table is white */
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #020230; /* Darker border for better separation */
+  text-align: left;
+  color: white;
+}
+
+th {
+  background-color: #020230; /* Darker header for contrast */
+  font-weight: bold;
 }

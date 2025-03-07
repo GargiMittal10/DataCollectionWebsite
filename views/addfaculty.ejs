@@ -3,34 +3,37 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <title>Admin Dashboard - Add Faculty Data</title>
-    <!-- Corrected CSS paths -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <!-- Site Metas -->
+        <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+        <meta name="keywords" content="" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+    
+        <title>Add Faculty Data</title>
     <link rel="stylesheet" href="/css/bootstrap.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
     <link href="/css/font-awesome.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
     <link href="/css/responsive.css" rel="stylesheet" />
     <style>
-      /* Add more space without centering */
-      .admin_section {
-        padding: 50px; /* Increased padding */
+      body {
+        background-color: #020230;
+        color: #020230;
       }
-      .heading_container {
-        margin-bottom: 30px; /* More space below the heading */
+      .container-box {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        color: black;
+        max-width: 600px;
+        margin: 50px auto;
       }
-      .form-group {
-        margin-bottom: 20px; /* More space between form fields */
-      }
-      .btn {
-        padding: 10px 20px;
-        font-size: 16px;
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #020230;
       }
     </style>
   </head>
@@ -40,32 +43,33 @@
         <div class="container-fluid">
           <nav class="navbar navbar-expand-lg custom_nav-container">
             <a class="navbar-brand" href="/coordinatordash">
-              <span></span>
+              <span>
+                <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+              </span>
             </a>
-            <button
-              class="navbar-toggler"
-              type="button"
-              data-toggle="collapse"
-              data-target="#navbarSupportedContent"
-            >
-              <span class=""></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <a class="navbar-brand" href="/"> </a>
               <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                  <a class="nav-link" href="/coordinatordash">Home</a>
+                <li class="nav-item"><a class="nav-link" href="/coordinatordash">Home</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="addDropdown" role="button" data-toggle="dropdown">Add Data</a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
+                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                  </div>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/addfaculty">Add Faculty Data</a>
+                <li id="mappingBtn" class="nav-item"><a class="nav-link" href="/mapping">Mapping</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="viewsDropdown" role="button" data-toggle="dropdown">Views</a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewstudent">View Students</a>
+                    <a class="dropdown-item" href="/viewfacultycoord">View Faculty</a>
+                    <a class="dropdown-item" href="/viewmapping">View Mapping</a>
+                  </div>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/addstudent">Add Student Data</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/mapping"
-                    >Student and faculty mapping</a
-                  >
-                </li>
+                <li id="downloadBtn" class="nav-item"><a class="nav-link" href="/download-excel">Download Format</a></li>
+                <li class="nav-item"><a class="nav-link" href="/update-questionaire">Update Questionaire</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="confirmLogout()">Logout</a></li>
               </ul>
             </div>
           </nav>
@@ -73,31 +77,28 @@
       </header>
     </div>
 
-    <section class="admin_section">
-      <div class="container">
+    <section class="admin_section layout_padding">
+      <div class="container-box">
+        <h2>Add Faculty Data</h2>
         <div class="heading_container">
-          <h2>Add Faculty Data</h2>
         </div>
-        <form action="#" method="post" enctype="multipart/form-data">
+        <form action="/upload-faculty" method="post" enctype="multipart/form-data">
           <div class="form-group">
             <label for="facultyFile">Upload Faculty List (Excel)</label>
-            <input
-              type="file"
-              class="form-control"
-              id="facultyFile"
-              name="facultyFile"
-              accept=".xls,.xlsx"
-              required
-            />
+            <input type="file" class="form-control" id="facultyFile" name="facultyFile" required />
           </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary btn-block">Upload</button>
         </form>
       </div>
     </section>
-
-    <!-- Corrected JS paths -->
     <script src="/js/jquery-3.4.1.min.js"></script>
     <script src="/js/bootstrap.js"></script>
-    <script src="/js/custom.js"></script>
+    <script>
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/login";
+        }
+      }
+    </script>
   </body>
 </html>
