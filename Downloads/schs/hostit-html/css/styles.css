@@ -1,0 +1,191 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f8f9fa;
+    width: 100%;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    background: white;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Left Side - Login Form */
+.login-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    padding: 40px;
+    position: relative;
+}
+
+/* Logo should be at the top but centered */
+.logo {
+    width: 80px;
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Wrapper to center the form */
+.login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    max-width: 400px;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+input {
+    padding: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    background: #f3f3f3;
+    width: 100%;
+}
+
+input:focus {
+    border-color: #007bff;
+}
+
+/* âœ… Perfect "Remember Me" Checkbox Alignment */
+.options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Wrapper to align checkbox properly */
+.remember-me {
+    display: flex;
+    align-items: start;
+    gap: 8px; /* Space between checkbox and text */
+}
+
+.remember-me input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    position: relative; /* Moves checkbox slightly lower */
+    cursor: pointer;
+    margin: 0; /* Removes unwanted spacing */
+    vertical-align: middle;
+}
+
+.options a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Login Button */
+.login-btn {
+    background: #020230;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+}
+
+.login-btn:hover {
+    background: #2563eb;
+}
+
+p {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+p a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* Right Side - Illustration */
+.illustration-section {
+    flex: 1;
+    background: #020230; /* Updated color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    height: 100%;
+}
+
+
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .login-section,
+    .illustration-section {
+        flex: none;
+        width: 100%;
+    }
+
+    .logo {
+        top: 3%;
+    }
+
+    .login-content {
+        width: 90%;
+    }
+
+    .options {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+    }
+}

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Evaluation Form</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap"
+    />
+    <link rel="stylesheet" href="/css/form.css" />
+
+    <style>
+      .start-button {
+        background-color: #4caf50;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+
+      /* Stop Button Styles */
+      .stop-button {
+        background-color: #f44336;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+
+      /* Back Button Styles */
+      .back-button {
+        background-color: #333;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+
+      /* View Results Button Styles */
+      .view-results-button {
+        background-color: #333;
+        border: none;
+        color: #fff;
+        padding: 10px 30px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        margin: 10px 460px;
+      }
+
+      /* Navigation Buttons Container */
+      .navigation-buttons-container {
+        display: flex;
+        justify-content: flex-start;
+        gap: 10px;
+        margin: 10px 0;
+      }
+    </style>
+    <!-- The CSS for buttons and form layout is assumed to be in /css/form.css -->
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 id="title">Student Evaluation Form</h1>
+      </header>
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons-container">
+        <button type="button" class="back-button" onclick="window.location.href='/viewforms';">
+          Back
+        </button>
+        <button type="button" class="view-results-button" onclick="window.location.href='/studentdata';">
+          View Results
+        </button>
+      </div>
+      <form id="evaluation-form">
+        <!-- Skill Selection -->
+        <div class="form-group">
+          <label for="skill">Select Skill</label>
+          <select name="skill" id="skill" class="form-control" required>
+            <option value="" disabled selected>Loading skills...</option>
+          </select>
+        </div>
+        <!-- Student Selection -->
+        <div class="form-group">
+          <label for="prn">Select Student (PRN)</label>
+          <select name="prn" id="prn" class="form-control" required>
+            <option value="" disabled selected>Select skill first</option>
+          </select>
+        </div>
+        <!-- Date -->
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input
+            type="date"
+            name="date"
+            id="date"
+            class="form-control"
+            required
+          />
+        </div>
+        <!-- Conducted Time Field (always manually entered) -->
+        <div class="form-group">
+          <label for="conducted_time">Conducted Time</label>
+          <input
+            type="time"
+            name="conducted_time"
+            id="conducted_time"
+            class="form-control"
+            required
+          />
+        </div>
+        <!-- Time Mode for Total Time -->
+        <div class="form-group">
+          <label for="time-mode">Total Time Mode</label>
+          <select id="time-mode" class="form-control">
+            <option value="manual" selected>Manual</option>
+            <option value="automatic">Automatic</option>
+          </select>
+        </div>
+        <!-- Automatic Timer Controls (visible only when automatic mode is selected) -->
+        <div class="form-group automatic-timer-start" style="display: none">
+          <button type="button" id="start-timer" class="start-button">
+            Start Timer
+          </button>
+        </div>
+        <div class="form-group automatic-timer-stop" style="display: none">
+          <button type="button" id="stop-timer" class="stop-button">
+            Stop Timer
+          </button>
+        </div>
+        <!-- Evaluation Table -->
+        <h3 id="skill-title">Evaluation</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Q.no</th>
+              <th>Task</th>
+              <th>Completed</th>
+              <th>Not Completed</th>
+            </tr>
+          </thead>
+          <tbody id="task-list">
+            <!-- Evaluation questions will be dynamically inserted here -->
+          </tbody>
+        </table>
+        <div class="form-group">
+          <p id="timer-display"></p>
+        </div>
+        <div class="form-group total-time">
+          <label for="total-time">Total Time Taken (in minutes)</label>
+          <input
+            type="text"
+            name="totalTime"
+            id="total-time"
+            class="form-control"
+            placeholder="00:00"
+          />
+        </div>
+        <!-- Submit Button -->
+        <div class="form-group">
+          <button type="submit" class="submit-button">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("auth_token");
+        const form = document.getElementById("evaluation-form");
+        const skillSelect = document.getElementById("skill");
+        const prnSelect = document.getElementById("prn");
+        const taskList = document.getElementById("task-list");
+        const dateInput = document.getElementById("date");
+        const totalTimeInput = document.getElementById("total-time");
+        const conductedTimeInput = document.getElementById("conducted_time");
+        const timeModeSelect = document.getElementById("time-mode");
+        const startTimerBtn = document.getElementById("start-timer");
+        const stopTimerBtn = document.getElementById("stop-timer");
+        const timerDisplay = document.getElementById("timer-display");
+        const autoTimerStartSection = document.querySelector(
+          ".automatic-timer-start"
+        );
+        const autoTimerStopSection = document.querySelector(
+          ".automatic-timer-stop"
+        );
+
+        let startTime, timerInterval;
+
+        if (!token) {
+          alert("Unauthorized access! Please log in.");
+          window.location.href = "/login";
+          return;
+        }
+
+        // Set date input to today's date and restrict selection
+        const today = new Date().toISOString().split("T")[0];
+        dateInput.value = today;
+        dateInput.setAttribute("min", today);
+        dateInput.setAttribute("max", today);
+
+        // Handle Time Mode switching for Total Time
+        timeModeSelect.addEventListener("change", function () {
+          if (timeModeSelect.value === "manual") {
+            // Manual mode: allow user entry
+            totalTimeInput.readOnly = false;
+            autoTimerStartSection.style.display = "none";
+            autoTimerStopSection.style.display = "none";
+            timerDisplay.textContent = "";
+          } else {
+            // Automatic mode: disable manual editing, show timer controls
+            totalTimeInput.readOnly = true;
+            autoTimerStartSection.style.display = "block";
+            autoTimerStopSection.style.display = "none";
+            timerDisplay.textContent = "Timer: 0 min 0 sec";
+            totalTimeInput.value = "";
+          }
+        });
+
+        // Timer logic for Automatic mode (for Total Time)
+        startTimerBtn.addEventListener("click", () => {
+          startTime = Date.now();
+          timerInterval = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+            const minutes = Math.floor(elapsedTime / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            timerDisplay.textContent = `Timer: ${minutes} min ${seconds} sec`;
+          }, 1000);
+          startTimerBtn.style.display = "none";
+          autoTimerStopSection.style.display = "block";
+        });
+
+        stopTimerBtn.addEventListener("click", () => {
+          clearInterval(timerInterval);
+          const elapsedTime = Date.now() - startTime;
+          const minutes = Math.floor(elapsedTime / 60000);
+          const seconds = Math.floor((elapsedTime % 60000) / 1000);
+          // Compute total time as minutes + (seconds / 60)
+          const computedTotal = (minutes + seconds / 60).toFixed(2);
+          totalTimeInput.value = computedTotal;
+          timerDisplay.textContent = `Final Time: ${minutes} min ${seconds} sec`;
+          autoTimerStopSection.style.display = "none";
+          startTimerBtn.style.display = "block";
+        });
+
+        // Fetch available skills
+        async function fetchSkills() {
+          try {
+            const response = await fetch("/getFacultySkills", {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const skills = await response.json();
+            skillSelect.innerHTML =
+              '<option value="" disabled selected>Select Skill</option>';
+            skills.forEach((skill) => {
+              const option = document.createElement("option");
+              option.value = skill.skill_id;
+              option.textContent = skill.skill_name;
+              skillSelect.appendChild(option);
+            });
+          } catch (error) {
+            console.error("Error fetching skills:", error);
+            skillSelect.innerHTML =
+              '<option value="" disabled>Error loading skills</option>';
+          }
+        }
+
+        // Fetch students for selected skill
+        async function fetchStudents(skillId) {
+          try {
+            const response = await fetch(`/getStudentsBySkill/${skillId}`, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const students = await response.json();
+            prnSelect.innerHTML =
+              '<option value="" disabled selected>Select Student</option>';
+            if (students.length === 0) {
+              prnSelect.innerHTML +=
+                '<option value="" disabled>No students available</option>';
+            } else {
+              students.forEach((student) => {
+                const option = document.createElement("option");
+                option.value = student.student_id;
+                option.textContent = `${student.student_id} - ${student.student_name}`;
+                prnSelect.appendChild(option);
+              });
+            }
+          } catch (error) {
+            console.error("Error fetching students:", error);
+            prnSelect.innerHTML =
+              '<option value="" disabled>Error loading students</option>';
+          }
+        }
+
+        // Fetch evaluation questions for selected skill
+        async function fetchQuestions(skillId) {
+          try {
+            const response = await fetch(`/fetch-questions/${skillId}`);
+            const questions = await response.json();
+            taskList.innerHTML = "";
+            if (questions.length === 0) {
+              taskList.innerHTML =
+                "<tr><td colspan='4'>No questions available.</td></tr>";
+              return;
+            }
+            questions.forEach((task) => {
+              taskList.innerHTML += `
+              <tr>
+                <td>${task.Qno}</td>
+                <td>${task.Question}</td>
+                <td><input type="radio" name="task${task.Qno}" value="1" required></td>
+                <td><input type="radio" name="task${task.Qno}" value="0"></td>
+              </tr>
+            `;
+            });
+          } catch (error) {
+            console.error("Error fetching questions:", error);
+          }
+        }
+
+        // When a skill is selected, fetch corresponding students and questions
+        skillSelect.addEventListener("change", async function () {
+          const selectedSkill = skillSelect.value;
+          if (!selectedSkill) return;
+          await fetchStudents(selectedSkill);
+          await fetchQuestions(selectedSkill);
+        });
+
+        // Form submission handler – build results array and send to backend
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const selectedSkill = skillSelect.value;
+          const selectedPrn = prnSelect.value;
+          const totalTime = totalTimeInput.value;
+          const conductedDate = dateInput.value;
+          const conductedTime = conductedTimeInput.value;
+
+          if (!selectedSkill || !selectedPrn) {
+            alert("Please select both skill and student.");
+            return;
+          }
+
+          // Build the results array by iterating over each row of the evaluation table
+          const results = [];
+          document.querySelectorAll("#task-list tr").forEach((row) => {
+            const Qno = row.cells[0].innerText;
+            const completedInput = row.querySelector(
+              `input[name="task${Qno}"]:checked`
+            );
+            if (completedInput) {
+              results.push({
+                student_id: selectedPrn,
+                skill_id: selectedSkill,
+                Qno: parseInt(Qno),
+                Result: parseInt(completedInput.value), // 1 for completed, 0 for not completed
+                totaltime: totalTime,
+                conducted_time: conductedTime,
+                conducted_date: conductedDate,
+              });
+            }
+          });
+
+          if (results.length === 0) {
+            alert("Please complete the evaluation for at least one question.");
+            return;
+          }
+
+          try {
+            const response = await fetch("/submit-results", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ results }),
+            });
+            const resData = await response.json();
+            if (response.ok) {
+              alert("Results submitted successfully!");
+              form.reset();
+              totalTimeInput.value = "";
+              timerDisplay.textContent = "Timer: 0 min 0 sec";
+              dateInput.value = today;
+            } else {
+              alert("Error: " + resData.error);
+            }
+          } catch (error) {
+            console.error("Error saving data:", error);
+          }
+        });
+
+        await fetchSkills();
+      });
+    </script>
+  </body>
+</html>
