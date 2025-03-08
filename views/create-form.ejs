@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Evaluation Form</title>
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #020230;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            color: black !important;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 30px;
+            color: black !important;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        label {
+            text-align: left;
+            margin-bottom: 5px;
+            color: black;
+        }
+        input[type="text"], input[type="file"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: black;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #ff4646;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ff7b7b;
+        }
+        .hero_area {
+            flex-grow: 1;
+        }
+        .navbar-nav .nav-link {
+            color: white !important;
+        }
+        .dropdown-menu .dropdown-item {
+            color: black !important;
+        }
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: black !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span>
+                <img src="/images/symbilogo.jpg" alt="Symbiosis Logo" style="width: 50px; height: auto" />
+              </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="addDropdown" role="button" data-toggle="dropdown">
+                    Add Data
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
+                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                  </div>
+                </li>
+                <li id="mappingBtn" class="nav-item"><a class="nav-link" href="/mapping">Mapping</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="viewsDropdown" role="button" data-toggle="dropdown">
+                    Views
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewstudent">View Students</a>
+                    <a class="dropdown-item" href="/viewfacultycoord">View Faculty</a>
+                    <a class="dropdown-item" href="/viewmapping">View Mapping</a>
+                  </div>
+                </li>
+                <li id="downloadBtn" class="nav-item"><a class="nav-link" href="/download-excel">Download Format</a></li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+        <div class="container">
+            <h2>Create New Evaluation Form</h2>
+            
+            <p>You can download the correct format <a href="/download-excel-ques" style="color: #ff4646;">here</a>.</p>
+
+            
+            
+            <form id="createForm" action="/add-skill" method="POST" enctype="multipart/form-data">
+                <label for="skillName">Skill Name:</label>
+                <input type="text" id="skillName" name="skillName" required>
+                
+                <label for="questionFile">Upload Questions (Excel):</label>
+                <input type="file" id="questionFile" name="questionFile" accept=".xlsx, .xls" required>
+                
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('createForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const skillName = document.getElementById('skillName').value.trim();
+            const fileInput = document.getElementById('questionFile');
+            
+            if (!skillName) {
+                alert('Please enter a skill name.');
+                return;
+            }
+            
+            if (!fileInput.files.length) {
+                alert('Please upload an Excel file with questions.');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/add-skill', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.text();
+                alert(result);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the form.');
+            }
+        });
+        function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+        }
+      }
+    </script>
+</body>
+</html>

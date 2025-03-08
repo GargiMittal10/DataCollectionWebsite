@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap');
+
+:root {
+    --color-white: #f3f3f3;
+    --color-darkblue: #edebebf1;
+    --color-darkblue-alpha: rgb(225, 225, 227);
+    --color-green: #020230;
+    --color-black: #333;
+    --color-border: #dcdcdf;
+    --color-hover: #e0e0e0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-black);
+    background: var(--color-darkblue);
+    padding: 20px;
+}
+
+/* Form Container */
+.container {
+    width: 100%;
+    max-width: 750px;
+    margin: auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 5px solid var(--color-border);
+    box-shadow: 0 0 15px rgba(224, 225, 225, 0.6);
+}
+
+/* Headings */
+h1, h3 {
+    text-align: center;
+    color: var(--color-green);
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 1.8rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+}
+
+/* Labels & Form Fields */
+label {
+    font-size: 1rem;
+    color: var(--color-black);
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    transition: 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-green);
+    box-shadow: 0 0 5px rgba(2, 2, 48, 0.3);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+th {
+    background: var(--color-green);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+td {
+    background: var(--color-white);
+}
+
+tr:hover {
+    background: var(--color-hover);
+}
+
+input[type="radio"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+/* Submit Button */
+.submit-button {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-green);
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.submit-button:hover {
+    background: #030354;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}

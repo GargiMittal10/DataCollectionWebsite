@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <!-- Site Metas -->
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>Faculty Dashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+
+    <!-- Fonts style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome style -->
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+
+    <!-- Custom styles for this template -->
+    <link href="/css/style.css" rel="stylesheet" />
+    <!-- Responsive style -->
+    <link href="/Faculty-Dashboard Html/css/responsive.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="hero_area">
+      <!-- Header section starts -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span
+                ><img
+                  src="/images/symbilogo.jpg"
+                  alt="Logo"
+                  style="width: 50px; height: auto"
+              /></span>
+            </a>
+
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class=""> </span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/faculty-dashboard"
+                    >Home <span class="sr-only">(current)</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewforms">Take Evaluation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/studentdata">Student Data</a>
+                </li>
+                
+                <!-- <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li> -->
+
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="facultyDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span id="facultyName">Loading...</span>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="facultyDropdown">
+                    <a class="dropdown-item text-danger" href="/logout"
+                    onclick="confirmLogout()">Logout</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <!-- End header section -->
+
+      <!-- Slider section -->
+      <section class="slider_section">
+        <div id="customCarousel1" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail-box">
+                      <h1 style="font-size: 3rem; font-weight: bold;">
+                        Welcome to <br />
+                        Faculty Dashboard
+                      </h1>                     
+                      <p>Conduct evaluations, track student progress, and view results efficiently.</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-lg-10 mx-auto">
+                        <div class="img-box">
+                          <img src="/images/slider-img.png" alt="Slider Image">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel_btn-box"></div>
+        </div>
+      </section>
+      <!-- End slider section -->
+    </div>
+
+    <!-- Bootstrap and jQuery scripts -->
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+
+    <!-- JavaScript to Fetch Faculty Name -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const token = localStorage.getItem("auth_token");
+
+        if (!token) {
+          console.error("❌ No token found in localStorage");
+          document.getElementById("facultyName").textContent =
+            "Unknown Faculty";
+          return;
+        }
+
+        try {
+          const response = await fetch("/getFacultyName", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById("facultyName").textContent =
+              data.facultyName;
+          } else {
+            document.getElementById("facultyName").textContent =
+              "Unknown Faculty";
+          }
+        } catch (error) {
+          console.error("❌ Error fetching faculty name:", error);
+        }
+      });
+      function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+      }
+  }
+
+    </script>
+  </body>
+</html>

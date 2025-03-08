@@ -1,0 +1,47 @@
+/* Ensure the body background is white */
+body.sub_page {
+    background-color: #ffffff !important;
+    color: #333; /* Optional: set default text color */
+  }
+  
+  /* Main container should have a white background */
+  .container {
+    background-color: #ffffff;
+  }
+  
+  /* Override hero_area or any other wrapper element with a white background */
+  .hero_area {
+    background-color: #ffffff;
+  }
+  
+  /* Style the table for clarity */
+  .table {
+    background-color: #ffffff;
+    color: #333;
+  }
+  
+  /* If you want the table header to remain dark for contrast, you can leave this as-is.
+     Otherwise, set a white background if needed. */
+  .thead-dark th {
+    background-color: #343a40;  /* or use #ffffff for white */
+    color: #ffffff;             /* or change text color for visibility */
+  }
+  
+  /* Optionally override header section background to a light shade */
+  .header_section {
+    background-color: #f8f9fa;  /* Adjust as necessary, or use #ffffff for pure white */
+  }
+  
+  /* For extra safety, force white background on any element that might have a dark background */
+  * {
+    background-color: transparent;
+  }
+  
+  body.sub_page,
+  .container,
+  .hero_area,
+  .header_section,
+  .table {
+    background-color: #ffffff !important;
+  }
+  

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/images/fevicon.png" type="image/gif" />
+    <title>Faculty List</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span>SCHS LOGO</span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class=""> </span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewfacultyadmin">Faculty List</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/admin">Back</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <section class="faculty_section">
+        <div class="container">
+          <button class="btn btn-success mb-3" onclick="sendCredentialsToAll()">
+            Send Credentials to All
+          </button>
+
+          <h2 class="text-center">Faculty List</h2>
+          <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+              <tr>
+                <th>Faculty ID</th>
+                <th>Email</th>
+                <th>Send Credentials</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% facultyList.forEach(faculty => { %>
+              <tr>
+                <td><%= faculty.faculty_id %></td>
+                <td><%= faculty.faculty_email %></td>
+                <td>
+                  <button
+                    class="btn btn-primary"
+                    onclick="sendCredentials('<%= faculty.faculty_id %>', '<%= faculty.faculty_email %>')"
+                  >
+                    Send Credentials
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <footer class="footer_section">
+      <div class="container">
+        <p>&copy; <span id="displayYear"></span> All Rights Reserved.</p>
+      </div>
+    </footer>
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+    <script>
+      function sendCredentials(facultyId, email) {
+        fetch("/send-credentials", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ facultyId: facultyId, email: email }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Server Response:", data);
+            if (data.message === "✅ Credentials sent successfully!") {
+              alert("Credentials sent successfully");
+            } else {
+              alert("Failed to send credentials");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Error sending credentials");
+          });
+      }
+      function sendCredentialsToAll() {
+        if (
+          confirm(
+            "Are you sure you want to send credentials to all faculty members?"
+          )
+        ) {
+          fetch("/send-credentials-all", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.message || "Error sending credentials to all");
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error sending credentials to all");
+            });
+        }
+      }
+    </script>
+  </body>
+</html>
