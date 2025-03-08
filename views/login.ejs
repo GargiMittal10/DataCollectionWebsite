@@ -148,6 +148,20 @@
             alert("An error occurred during login.");
           });
       });
+      const originalFetch = window.fetch;
+  window.fetch = function (...args) {
+    return originalFetch(...args)
+      .then(response => {
+        if (response.status === 401 || response.status === 403) {  // ✅ Detect expired session & invalid token
+          return response.json().then(data => {
+            alert(data.message);  // ✅ Show the exact error message (session expired, unauthorized, etc.)
+            window.location.href = "/login";  // ✅ Redirect to login page
+          });
+        }
+        return response;
+      })
+      .catch(error => console.error("❌ API error:", error));
+  };
     </script>
   </body>
 </html>

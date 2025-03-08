@@ -7,19 +7,19 @@ const db = mysql.createConnection({
     user: process.env.DB_USER,        // Use the user from .env
     password: process.env.DB_PASSWORD, // Use the password from .env
     database: process.env.DB_DATABASE, 
+    waitForConnections: true,
+    connectionLimit: 13,  // ✅ Only allow 10 active connections at a time
+    queueLimit: 75
 });
 
 // 📌 Connect to MySQL
-db.connect((err) => {
+db.query("SELECT 1", (err, results) => {
   if (err) {
-    console.error("❌ MySQL Connection Failed:", err);
-    return;
+      console.error("❌ MySQL Connection Failed:", err);
+      return;
   }
   console.log("✅ Connected to MySQL Database");
-   // 📌 Create Database and Tables
-   
 });
-
 
 // 📌 Export the Connection
 module.exports = db;

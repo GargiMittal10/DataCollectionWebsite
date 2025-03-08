@@ -17,6 +17,16 @@ const cors = require("cors");
 const _ = require("lodash");
 const bcrypt = require('bcrypt');
 
+const rateLimit = require("express-rate-limit");
+const validator = require("validator");
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  max: 5,  // Maximum 5 login attempts
+  handler: (req, res) => {
+      console.warn("❌ Too many failed login attempts:", req.ip);
+      res.status(429).json({ error: "❌ Too many failed login attempts. Try again later." });
+  }
+});
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
 // Multer storage configuration
@@ -273,7 +283,7 @@ app.post("/send-credentials", async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', loginLimiter, async (req, res) => {
   const { email, password, role } = req.body;
   console.log("🔹 Login attempt:", { email, role });
 
@@ -282,38 +292,35 @@ app.post('/login', async (req, res) => {
     return res.status(400).json({ error: "Email, password, and role are required." });
   }
 
-  // Hardcoded credentials for admin and coordinator
-  const adminEmail = "gvithalani8@gmail.com";
-  const adminPassword = "Admin@123";
-  const coordinatorEmail = "coordinator@example.com";
-  const coordinatorPassword = "123";
+  if (!validator.isEmail(email) || !validator.isLength(password, { min: 6 })) {
+    return res.status(400).json({ error: "Invalid email or password format." });
+  }
 
   try {
-    // ✅ Admin Login
-    if (role.toLowerCase() === "admin" && email === adminEmail && password === adminPassword) {
-      const token = jwt.sign({ email, role: "admin" }, SECRET_KEY, { expiresIn: "2h" });
-
-      console.log("✅ Admin token generated:", token);
-      res.cookie("auth_token", token, { httpOnly: true, secure: false, maxAge: 2 * 60 * 60 * 1000 });
-
-      return res.json({ token, role: "admin", redirectUrl: "/admindash" });
+    if (role.toLowerCase() === "admin") {
+      if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+        return generateTokenAndRespond(res, email, "admin", "/admindash");
+      } else {
+        return res.status(401).json({ error: "Invalid admin credentials." });
+      }
     }
 
-    // ✅ Coordinator Login
-    if (role.toLowerCase() === "coordinator" && email === coordinatorEmail && password === coordinatorPassword) {
-      const token = jwt.sign({ email, role: "coordinator" }, SECRET_KEY, { expiresIn: "2h" });
-
-      console.log("✅ Coordinator token generated:", token);
-      res.cookie("auth_token", token, { httpOnly: true, secure: false, maxAge: 2 * 60 * 60 * 1000 });
-
-      return res.json({ token, role: "coordinator", redirectUrl: "/coordinatordash" });
+    if (role.toLowerCase() === "coordinator") {
+      if (email === process.env.COORDINATOR_EMAIL && password === process.env.COORDINATOR_PASSWORD) {
+        return generateTokenAndRespond(res, email, "coordinator", "/coordinatordash");
+      } else {
+        return res.status(401).json({ error: "Invalid coordinator credentials." });
+      }
     }
 
-    // ✅ Faculty Login with Database Check
     if (role.toLowerCase() === "faculty") {
-      const [users] = await db.promise().execute(
-        "SELECT * FROM faculty_login WHERE email = ?", [email]
-      );
+      let users;
+      try {
+        [users] = await db.promise().execute("SELECT * FROM faculty_login WHERE email = ?", [email]);
+      } catch (dbError) {
+        console.error("❌ Database query error:", dbError);
+        return res.status(500).json({ error: "Database error. Try again later." });
+      }
 
       if (users.length === 0) {
         console.error("❌ Faculty not found:", email);
@@ -322,25 +329,20 @@ app.post('/login', async (req, res) => {
 
       const user = users[0];
 
-      // 🔹 Compare entered password with stored hashed password
-      const passwordMatch = await bcrypt.compare(password, user.password);
+      let passwordMatch;
+      try {
+        passwordMatch = await bcrypt.compare(password, user.password);
+      } catch (bcryptError) {
+        console.error("❌ Password comparison error:", bcryptError);
+        return res.status(500).json({ error: "Password processing error. Try again." });
+      }
 
       if (!passwordMatch) {
         console.error("❌ Incorrect password for:", email);
         return res.status(401).json({ error: "Invalid email or password." });
       }
 
-      // 🔹 If password matches, generate a token
-      const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
-        SECRET_KEY,
-        { expiresIn: "8h" }
-      );
-
-      console.log("✅ Faculty login successful. Token generated:", token);
-      res.cookie("auth_token", token, { httpOnly: true, secure: false, maxAge: 8 * 60 * 60 * 1000 });
-
-      return res.json({ token, role: user.role, redirectUrl: "/faculty-dashboard" });
+      return generateTokenAndRespond(res, user.email, user.role, "/faculty-dashboard");
     }
 
     console.error("❌ Invalid role provided:", role);
@@ -351,6 +353,22 @@ app.post('/login', async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 });
+
+// ✅ Helper function to generate token and send response
+function generateTokenAndRespond(res, email, role, redirectUrl) {
+  const token = jwt.sign({ email, role }, process.env.SECRET_KEY, { expiresIn: "8h" });
+
+  console.log(`✅ ${role.charAt(0).toUpperCase() + role.slice(1)} login successful. Token generated.`);
+  res.clearCookie("auth_token");  
+  res.cookie("auth_token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 8 * 60 * 60 * 1000
+  });
+
+  return res.json({ token, role, redirectUrl });
+}
 
 
 
@@ -497,7 +515,7 @@ app.get("/faculty-dashboard", authenticateToken, (req, res) => {
   if (req.user.role.toLowerCase() !== "faculty") {
       return res.status(403).send("Access denied. Only faculty can view this page.");
   }
-  res.render("faculty-dashboard");
+  res.render("faculty-dashboard", { user: req.user });
 });
 
 app.get('/form', (req, res) => {
@@ -717,16 +735,21 @@ app.delete('/delete-student/:id', (req, res) => {
 
 
 // Delete selected students
-app.post('/delete-selected', (req, res) => {
-  const { student_ids } = req.body;
-  if (student_ids.length === 0) return res.status(400).send('No students selected');
-
-  const placeholders = student_ids.map(() => '?').join(',');
-  db.query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids, (err) => {
-    if (err) return res.status(500).send('Failed to delete selected students');
-    res.send('Selected students deleted successfully');
-  });
+app.post('/delete-selected', async (req, res) => {
+  try {
+    const { student_ids } = req.body;
+    if (!student_ids || student_ids.length === 0) {
+      return res.status(400).send('❌ No students selected.');
+    }
+    const placeholders = student_ids.map(() => '?').join(',');
+    await db.promise().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
+    res.send('✅ Selected students deleted successfully.');
+  } catch (err) {
+    console.error("❌ Error deleting students:", err);
+    res.status(500).send("❌ Database error.");
+  }
 });
+
 
 // Delete all students
 app.delete('/delete-all', (req, res) => {
@@ -739,70 +762,106 @@ app.delete('/delete-all', (req, res) => {
 
 app.post("/upload-faculty", upload.single("facultyFile"), async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ success: false, message: "❌ Please upload an Excel file." });
+    return res.status(400).json({ error: "❌ Please upload an Excel file." });
   }
 
   const filePath = path.join(__dirname, "uploads", req.file.filename);
-  const workbook = xlsx.readFile(filePath);
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const facultyData = xlsx.utils.sheet_to_json(sheet);
-
-  if (!facultyData || facultyData.length === 0) {
-    return res.status(400).json({ success: false, message: "❌ No faculty data found in the uploaded file." });
-  }
-
-  // Check for correct columns
-  const requiredColumns = ["Faculty_ID", "faculty_name", "department", "email"];
-  const fileColumns = Object.keys(facultyData[0]);
-  
-  const missingColumns = requiredColumns.filter(col => !fileColumns.includes(col));
-  if (missingColumns.length > 0) {
-    return res.status(400).json({ 
-      success: false, 
-      message: `❌ Wrong Excel format. Missing columns: ${missingColumns.join(", ")}. Please try again.` 
-    });
-  }
-
   try {
-    const values = facultyData
-      .filter(faculty => faculty.Faculty_ID && faculty.email)
-      .map(faculty => [
-        faculty.Faculty_ID,
-        faculty.faculty_name || null,
-        faculty.department || null,
-        faculty.email
-      ]);
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    let facultyData = xlsx.utils.sheet_to_json(sheet);
 
-    if (values.length > 0) {
-      try {
-        const [result] = await db.promise().query(
-          "INSERT INTO faculty (faculty_id, faculty_name, department, email) VALUES ?",
-          [values]
-        );
+    if (!facultyData || facultyData.length === 0) {
+      return res.status(400).json({ error: "❌ No faculty data found in the uploaded file." });
+    }
 
-        if (result.affectedRows > 0) {
-          return res.json({ success: true, message: "✅ Faculty data uploaded successfully!" });
-        } else {
-          return res.status(400).json({ success: false, message: "❌ No faculty data was inserted. Check your file content." });
-        }
-      } catch (dbError) {
-        if (dbError.code === 'ER_DUP_ENTRY') {
-          return res.status(400).json({ success: false, message: "❌ Duplicate faculty IDs found. Please remove duplicates and try again." });
-        }
-        console.error("❌ Database error:", dbError);
-        return res.status(500).json({ success: false, message: "❌ Error inserting faculty data into the database." });
+    // **Normalize Column Names**
+    const columnMap = {
+      "faculty id": "faculty_id",
+      "faculty name": "faculty_name",
+      "department": "department",
+      "email": "email"
+    };
+
+    facultyData = facultyData.map(row =>
+      _.mapKeys(row, (value, key) => columnMap[key.trim().toLowerCase().replace(/\s+/g, "")] || key)
+    );
+
+    console.log("✅ Normalized Data:", facultyData.slice(0, 5));
+
+    // **Required Columns Check**
+    const requiredColumns = ["faculty_id", "faculty_name", "department", "email"];
+    const sheetColumns = Object.keys(facultyData[0]);
+    const missingColumns = requiredColumns.filter(col => !sheetColumns.includes(col));
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({ error: `❌ Incorrect file format. Missing columns: ${missingColumns.join(", ")}` });
+    }
+
+    // **Validation Rules**
+    const facultyIdRegex = /^FAC\d{3}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let invalidRows = [];
+
+    const validatedFacultyData = facultyData.filter((faculty, index) => {
+      let errors = [];
+
+      if (!faculty.faculty_id || !facultyIdRegex.test(faculty.faculty_id)) {
+        errors.push(`Invalid Faculty ID format: ${faculty.faculty_id || "Missing"}`);
       }
+
+      if (!faculty.email || !emailRegex.test(faculty.email)) {
+        errors.push(`Invalid Email format: ${faculty.email || "Missing"}`);
+      }
+
+      if (errors.length > 0) {
+        invalidRows.push({ row: index + 2, errors });
+        return false;
+      }
+
+      return true;
+    });
+
+    if (invalidRows.length > 0) {
+      return res.status(400).json({ message: "❌ Errors found in faculty data.", errors: invalidRows });
+    }
+
+    // **Prepare Data for Insertion**
+    const values = validatedFacultyData.map((faculty) => [
+      faculty.faculty_id.trim(),
+      faculty.faculty_name?.trim() || null,
+      faculty.department?.trim() || null,
+      faculty.email.trim()
+    ]);
+
+    // **Insert Data with Duplicate Key Update**
+    const query = `
+      INSERT INTO faculty (faculty_id, faculty_name, department, email) VALUES ?
+      ON DUPLICATE KEY UPDATE 
+      faculty_name = VALUES(faculty_name), 
+      department = VALUES(department), 
+      email = VALUES(email)
+    `;
+
+    const [result] = await db.promise().query(query, [values]);
+
+    if (result.affectedRows > 0) {
+      return res.json({ success: "✅ Faculty data uploaded successfully!" });
     } else {
-      return res.status(400).json({ success: false, message: "❌ No valid faculty data found in the uploaded file." });
+      return res.status(400).json({ error: "❌ No faculty data was inserted. Check your file content." });
     }
   } catch (error) {
-    console.error("❌ Error processing faculty data:", error);
-    res.status(500).json({ success: false, message: "❌ Error processing faculty data." });
+    console.error("❌ Error inserting faculty data:", error);
+    res.status(500).json({ error: "❌ Error processing faculty data.", details: error.message });
+  } finally {
+    // **Delete the temporary file**
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("❌ Error deleting file:", err);
+      else console.log(" Temporary file deleted:", filePath);
+    });
   }
 });
-
-
 
 app.get("/viewfaculty", async (req, res) => {
   try {
@@ -1095,15 +1154,17 @@ app.post('/delete-selected-skill-viewmapping', (req, res) => {
 });
 
 // Delete all student mappings
-app.post('/delete-all-student-viewmapping', (req, res) => {
-  const query = 'DELETE FROM faculty_student_mapping';
-  db.query(query, (err, result) => {
-      if (err) {
-          console.error("Error deleting all student mappings:", err);
-          return res.status(500).json({ message: "Failed to delete all student mappings" });
-      }
-      res.json({ message: "All student mappings deleted successfully", affectedRows: result.affectedRows });
-  });
+app.post('/delete-all-student-viewmapping', async (req, res) => {
+  try {
+    const query = 'DELETE FROM faculty_student_mapping';
+    const [result] = await db.promise().execute(query);
+
+    res.json({ message: "✅ All student mappings deleted successfully", affectedRows: result.affectedRows });
+
+  } catch (err) {
+    console.error("❌ Error deleting all student mappings:", err);
+    res.status(500).json({ message: "❌ Failed to delete all student mappings" });
+  }
 });
 
 // Delete all skill mappings
@@ -1245,20 +1306,15 @@ for (const row of rows) {
 });
 
 
-
-// Let me know if you want to add more validations or optimize this further! 🚀
-
-
-
-
 app.get("/logout", (req, res) => {
-  req.session.destroy(err => {
-      if (err) {
-          console.error("❌ Error logging out:", err);
-          return res.status(500).send("❌ Logout error.");
-      }
-      res.redirect("/login");
+  res.clearCookie("auth_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict"
   });
+
+  console.log("✅ User logged out successfully.");
+  res.redirect("/login");  // ✅ Redirect user to login page after logout
 });
 
 
@@ -1294,6 +1350,7 @@ app.get('/getFacultyName', async (req, res) => {
       if (error.name === "JsonWebTokenError") {
           return res.status(401).json({ error: "Invalid token" });
       } else if (error.name === "TokenExpiredError") {
+
           return res.status(401).json({ error: "Token expired" });
       }
       res.status(500).json({ error: "Internal server error" });
