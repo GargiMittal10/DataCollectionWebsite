@@ -401,6 +401,24 @@
           window.location.href = "/logout";
         }
       }
+      document.getElementById("deleteAll").addEventListener("click", function () {
+    if (!confirm("⚠ Are you sure you want to delete ALL faculty records? This action cannot be undone!")) return;
+
+    fetch("/delete-all-faculty", {
+        method: "DELETE"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.message.includes("✅")) {
+            location.reload();  // Reload page if deletion is successful
+        }
+    })
+    .catch(error => {
+        console.error("❌ Error deleting faculty:", error);
+        alert("❌ Failed to delete all faculty.");
+    });
+});
     </script>
   </body>
 </html>

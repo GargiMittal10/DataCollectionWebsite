@@ -41,6 +41,10 @@
         margin-bottom: 20px;
         color: #020230;
       }
+      .dropdown-menu .dropdown-item:hover {
+        background-color: transparent; /* Keep the background unchanged */
+        color: #ffc107; /* Change this to the color you want for the text */
+      }
     </style>
   </head>
   <body class="sub_page">
@@ -61,19 +65,8 @@
                 <li class="nav-item">
                   <a class="nav-link" href="/coordinatordash">Home</a>
                 </li>
-                <li class="nav-item dropdown">
-                  <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="addDropdown"
-                    role="button"
-                    data-toggle="dropdown"
-                    >Add Data</a
-                  >
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item" href="/addstudent">Add Students</a>
-                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
-                  </div>
+                <li id="mappingBtn" class="nav-item">
+                  <a class="nav-link" href="/addstudent">Add Student</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="/mapping">Mapping</a>

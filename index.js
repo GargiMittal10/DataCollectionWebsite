@@ -198,32 +198,35 @@ app.get("/create-form", (req, res) => res.render("create-form"));
 app.get("/update-form", (req, res) => res.render("update-form"));
 app.get('/viewmapping', async (req, res) => {
   try {
-      // Fix: Use `.promise().execute()` to properly return rows
-      const [facultyStudentMapping] = await db.promise().execute(`
-        SELECT fsm.id, f.faculty_name, s.student_name, sk.skill_name
-        FROM faculty_student_mapping fsm
-        JOIN faculty f ON fsm.faculty_id = f.faculty_id
-        JOIN students s ON fsm.student_id = s.student_id
-        JOIN skills sk ON fsm.skill_id = sk.skill_id
-      `);
-      
-      const [facultySkillMapping] = await db.promise().execute(`
-        SELECT fsm.id, f.faculty_name, sk.skill_name
-        FROM faculty_skill_mapping fsm
-        JOIN faculty f ON fsm.faculty_id = f.faculty_id
-        JOIN skills sk ON fsm.skill_id = sk.skill_id
-      `);
-      
+    const [facultyStudentMapping] = await db.promise().execute(`
+      SELECT 
+        fsm.id, 
+        f.faculty_name, 
+        s.student_name, 
+        sk.skill_name
+      FROM faculty_student_mapping fsm
+      JOIN faculty f ON fsm.faculty_id = f.faculty_id
+      JOIN students s ON fsm.student_id = s.student_id
+      JOIN skills sk ON fsm.skill_id = sk.skill_id
+    `);
+    
+    const [facultySkillMapping] = await db.promise().execute(`
+      SELECT 
+        fsm.id, 
+        f.faculty_name, 
+        sk.skill_name
+      FROM faculty_skill_mapping fsm
+      JOIN faculty f ON fsm.faculty_id = f.faculty_id
+      JOIN skills sk ON fsm.skill_id = sk.skill_id
+    `);
 
-      console.log("Faculty-Student Mapping Data:", facultyStudentMapping);
-      console.log("Faculty-Skill Mapping Data:", facultySkillMapping);
-
-      res.render('viewmapping', { facultyStudentMapping, facultySkillMapping });
+    res.render('viewmapping', { facultyStudentMapping, facultySkillMapping });
   } catch (error) {
-      console.error('Error fetching faculty mappings:', error);
-      res.status(500).send('Internal Server Error');
+    console.error('Error fetching faculty mappings:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
+
 
 
 
@@ -982,20 +985,24 @@ app.delete("/delete-faculty/:faculty_id/:email", async (req, res) => {
 // Delete all faculty
 app.delete("/delete-all-faculty", async (req, res) => {
   try {
-      // Delete all faculty login records first
+      // Delete mappings first to prevent foreign key constraint errors
+      await db.promise().query("DELETE FROM faculty_student_mapping");
+      await db.promise().query("DELETE FROM faculty_skill_mapping");
+
+      // Delete faculty login records (optional: if login records exist)
       await db.promise().query("DELETE FROM faculty_login");
 
       // Now delete all faculty records
       const [result] = await db.promise().query("DELETE FROM faculty");
 
       if (result.affectedRows > 0) {
-          res.send("✅ All faculty records deleted successfully!");
+          res.json({ message: "✅ All faculty records deleted successfully!" });
       } else {
-          res.status(404).send("❌ No faculty records found to delete.");
+          res.status(404).json({ message: "❌ No faculty records found to delete." });
       }
   } catch (error) {
       console.error("❌ Error deleting all faculty records:", error);
-      res.status(500).send("❌ Error deleting all faculty records.");
+      res.status(500).json({ message: "❌ Error deleting all faculty records." });
   }
 });
 
@@ -1206,12 +1213,12 @@ app.post("/submit-mapping", upload.single("studentFile"), async (req, res) => {
     let lastSkillId = null; // Store last valid Skill ID
 
 for (const row of rows) {
-    const faculty_id = row["Faculty ID"] ? String(row["Faculty ID"]).trim() : null;
-    const skill_id = row["Form Access"] ? String(row["Form Access"]).trim() : lastSkillId;
-    const student_id = row["Student ID"] ? String(row["Student ID"]).trim() : null;
+    const faculty_id = row["faculty_id"] ? String(row["faculty_id"]).trim() : null;
+    const skill_id = row["skill_id"] ? String(row["skill_id"]).trim() : lastSkillId;
+    const student_id = row["student_id"] ? String(row["student_id"]).trim() : null;
 
     // ✅ Update lastSkillId only if the current row has a valid skill_id
-    if (row["Form Access"]) {
+    if (row["skill_id"]) {
         lastSkillId = skill_id;
     }
 
@@ -1227,7 +1234,6 @@ for (const row of rows) {
         facultyStudentInsertQueries.push([faculty_id, student_id, skill_id]);
     }
 }
-
 
     console.log("✅ Extracted Faculty IDs:", Array.from(facultyIds));
     console.log("✅ Extracted Student IDs:", Array.from(studentIds));
@@ -1297,6 +1303,9 @@ for (const row of rows) {
         [facultyStudentInsertQueries]
       );
     }
+    console.log("🟢 Faculty-Skill Insert Queries:", facultySkillInsertQueries);
+console.log("🟢 Faculty-Student Insert Queries:", facultyStudentInsertQueries);
+
 
     res.send("✅ Mapping uploaded successfully!");
   } catch (error) {
@@ -1316,9 +1325,6 @@ app.get("/logout", (req, res) => {
   console.log("✅ User logged out successfully.");
   res.redirect("/login");  // ✅ Redirect user to login page after logout
 });
-
-
-
                                                                   
 // API: Get Faculty Name based on token (using email from token)
 app.get('/getFacultyName', async (req, res) => {
@@ -1431,9 +1437,6 @@ app.get('/getStudentsBySkill/:skill_id', authenticateToken, async (req, res) => 
     res.status(500).json({ error: "Failed to fetch students" });
   }
 });
-
-
-
 
 app.get('/fetch-questions/:skillId', async (req, res) => {
   try {
