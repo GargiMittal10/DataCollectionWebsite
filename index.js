@@ -133,7 +133,7 @@ app.get('/coordinatordash', authenticateToken, async (req, res) => {
 
 app.get("/mapping", (req, res) => res.render("mapping"));
 app.get("/download-excel", (req, res) => {
-  const filePath = path.join(__dirname, "uploads", "testing123.xlsx");
+  const filePath = path.join(__dirname, "uploads", "Mapping_Format.xlsx");
   res.download(filePath, "Mapping_Format.xlsx", (err) => {
       if (err) {
           console.error("Error downloading file:", err);
