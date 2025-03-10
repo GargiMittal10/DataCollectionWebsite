@@ -234,7 +234,7 @@
               <th>Faculty ID</th>
               <th>Student Name</th>
               <th>Skill</th>
-              <th>Actions</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -251,14 +251,7 @@
               <td><%= row.faculty_name %></td>
               <td><%= row.student_name %></td>
               <td><%= row.skill_name %></td>
-              <td>
-                <button
-                  class="btn btn-danger"
-                  onclick="deleteRow('<%= row.id %>', 'faculty_student_mapping')"
-                >
-                  Delete
-                </button>
-              </td>
+              
             </tr>
             <% }); %>
           </tbody>
@@ -301,7 +294,7 @@
               <th>ID</th>
               <th>Faculty Name</th>
               <th>Skill Name</th>
-              <th>Actions</th>
+              <!-- <th>Actions</th> -->
             </tr>
           </thead>
           <tbody>
@@ -317,14 +310,14 @@
               <td><%= row.id %></td>
               <td><%= row.faculty_name %></td>
               <td><%= row.skill_name %></td>
-              <td>
+              <!-- <td>
                 <button
                   class="btn btn-danger"
                   onclick="deleteRow('<%= row.id %>', 'faculty_skill_mapping')"
                 >
                   Delete
                 </button>
-              </td>
+              </td> -->
             </tr>
             <% }); %>
           </tbody>
