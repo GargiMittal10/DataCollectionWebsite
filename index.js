@@ -16,6 +16,8 @@ const crypto = require("crypto");
 const cors = require("cors");
 const _ = require("lodash");
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+
 
 const rateLimit = require("express-rate-limit");
 const validator = require("validator");
@@ -133,8 +135,8 @@ app.get('/coordinatordash', authenticateToken, async (req, res) => {
 
 app.get("/mapping", (req, res) => res.render("mapping"));
 app.get("/download-excel", (req, res) => {
-  const filePath = path.join(__dirname, "uploads", "Mapping_Format.xlsx");
-  res.download(filePath, "Mapping_Format.xlsx", (err) => {
+  const filePath = path.join(__dirname, "uploads", "uploadmapping.xlsx");
+  res.download(filePath, "uploadmapping.xlsx", (err) => {
       if (err) {
           console.error("Error downloading file:", err);
           res.status(500).send("Error downloading file");
@@ -142,8 +144,8 @@ app.get("/download-excel", (req, res) => {
   });
 });
 app.get("/download-students", (req, res) => {
-  const filePath = path.join(__dirname, "uploads", "Studenttesting.xlsx");
-  res.download(filePath, "Studenttesting.xlsx", (err) => {
+  const filePath = path.join(__dirname, "uploads", "uploadstudent.xlsx");
+  res.download(filePath, "uploadstudent.xlsx", (err) => {
       if (err) {
           console.error("Error downloading file:", err);
           res.status(500).send("Error downloading file");
@@ -151,8 +153,8 @@ app.get("/download-students", (req, res) => {
   });
 });
 app.get("/download-faculty", (req, res) => {
-  const filePath = path.join(__dirname, "uploads", "faculty.xlsx");
-  res.download(filePath, "faculty.xlsx", (err) => {
+  const filePath = path.join(__dirname, "uploads", "uploadfaculty.xlsx");
+  res.download(filePath, "uploadfaculty.xlsx", (err) => {
       if (err) {
           console.error("Error downloading file:", err);
           res.status(500).send("Error downloading file");
@@ -200,24 +202,30 @@ app.get('/viewmapping', async (req, res) => {
   try {
     const [facultyStudentMapping] = await db.promise().execute(`
       SELECT 
-        fsm.id, 
-        f.faculty_name, 
-        s.student_name, 
-        sk.skill_name
-      FROM faculty_student_mapping fsm
-      JOIN faculty f ON fsm.faculty_id = f.faculty_id
-      JOIN students s ON fsm.student_id = s.student_id
-      JOIN skills sk ON fsm.skill_id = sk.skill_id
+        faculty_student_mapping.id,
+        faculty_student_mapping.faculty_id,  
+        faculty.faculty_name, 
+        students.student_name, 
+        skills.skill_name
+      FROM faculty_student_mapping
+      LEFT JOIN faculty ON faculty_student_mapping.faculty_id = faculty.faculty_id
+      LEFT JOIN students ON faculty_student_mapping.student_id = students.student_id
+      LEFT JOIN skills ON faculty_student_mapping.skill_id = skills.skill_id;
     `);
     
     const [facultySkillMapping] = await db.promise().execute(`
-      SELECT 
-        fsm.id, 
-        f.faculty_name, 
-        sk.skill_name
-      FROM faculty_skill_mapping fsm
-      JOIN faculty f ON fsm.faculty_id = f.faculty_id
-      JOIN skills sk ON fsm.skill_id = sk.skill_id
+    SELECT 
+    MIN(faculty_skill_mapping.id) AS id,  -- Pick the lowest ID per faculty-skill pair
+    faculty_skill_mapping.faculty_id,  
+    faculty.faculty_name, 
+    skills.skill_name
+FROM faculty_skill_mapping
+JOIN faculty ON faculty_skill_mapping.faculty_id = faculty.faculty_id
+JOIN skills ON faculty_skill_mapping.skill_id = skills.skill_id
+GROUP BY 
+    faculty_skill_mapping.faculty_id,  
+    faculty.faculty_name, 
+    skills.skill_name;
     `);
 
     res.render('viewmapping', { facultyStudentMapping, facultySkillMapping });
@@ -226,8 +234,6 @@ app.get('/viewmapping', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
-
 
 
 app.get("/login", (req, res) => {
@@ -539,7 +545,9 @@ app.get("/viewfacultyadmin", authenticateToken, async (req, res) => {
   }
 
   try {
-      const [facultyList] = await db.promise().query("SELECT faculty_id, faculty_name, email, department FROM faculty");
+      const [facultyList] = await db.promise().query(
+          "SELECT faculty_id, faculty_name, email, department FROM faculty ORDER BY CAST(SUBSTRING(faculty_id, 4) AS UNSIGNED) ASC"
+      );
       console.log("✅ Faculty list loaded successfully.");
       res.render("viewfacultyadmin", { facultyList, user: req.user }); // ✅ Pass user to EJS
   } catch (error) {
@@ -547,10 +555,6 @@ app.get("/viewfacultyadmin", authenticateToken, async (req, res) => {
       res.status(500).send("❌ Error fetching faculty data.");
   }
 });
-
-
-
-
 
 app.get('/getStudentDetails/:student_id', async (req, res) => {
   const student_id = req.params.student_id;
@@ -726,15 +730,26 @@ app.post('/update-student', async (req, res) => {
   }
 });
 
-// Delete single student
-app.delete('/delete-student/:id', (req, res) => {
+app.delete('/delete-student/:id', async (req, res) => {
   const studentID = req.params.id;
-  db.query('DELETE FROM students WHERE student_id = ?', [studentID], (err) => {
-    if (err) return res.status(500).send('Failed to delete student');
-    res.send('Student deleted successfully');
-  });
-});
 
+  try {
+    // First, delete the student from the mapping table to prevent foreign key constraint errors
+    await db.promise().query('DELETE FROM faculty_student_mapping WHERE student_id = ?', [studentID]);
+
+    // Now delete the student from the students table
+    const [result] = await db.promise().query('DELETE FROM students WHERE student_id = ?', [studentID]);
+
+    if (result.affectedRows > 0) {
+      res.send("✅ Student deleted successfully!");
+    } else {
+      res.status(404).send("❌ Student not found.");
+    }
+  } catch (error) {
+    console.error("❌ Error deleting student:", error);
+    res.status(500).send("❌ Error deleting student.");
+  }
+});
 
 
 // Delete selected students
@@ -744,8 +759,15 @@ app.post('/delete-selected', async (req, res) => {
     if (!student_ids || student_ids.length === 0) {
       return res.status(400).send('❌ No students selected.');
     }
+    
     const placeholders = student_ids.map(() => '?').join(',');
+
+    // First, delete students from the mapping table to prevent foreign key constraint errors
+    await db.promise().query(`DELETE FROM faculty_student_mapping WHERE student_id IN (${placeholders})`, student_ids);
+    
+    // Now, delete students from the students table
     await db.promise().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
+
     res.send('✅ Selected students deleted successfully.');
   } catch (err) {
     console.error("❌ Error deleting students:", err);
@@ -755,11 +777,19 @@ app.post('/delete-selected', async (req, res) => {
 
 
 // Delete all students
-app.delete('/delete-all', (req, res) => {
-  db.query('DELETE FROM students', (err) => {
-    if (err) return res.status(500).send('Failed to delete all students');
-    res.send('All students deleted successfully');
-  });
+app.delete('/delete-all', async (req, res) => {
+  try {
+    // First, delete all student records from the mapping table to prevent foreign key constraint errors
+    await db.promise().query('DELETE FROM faculty_student_mapping');
+
+    // Now, delete all students from the students table
+    await db.promise().query('DELETE FROM students');
+
+    res.send('✅ All students deleted successfully.');
+  } catch (err) {
+    console.error("❌ Error deleting all students:", err);
+    res.status(500).send("❌ Failed to delete all students.");
+  }
 });
 
 
@@ -830,13 +860,20 @@ app.post("/upload-faculty", upload.single("facultyFile"), async (req, res) => {
       return res.status(400).json({ message: "❌ Errors found in faculty data.", errors: invalidRows });
     }
 
-    // **Prepare Data for Insertion**
-    const values = validatedFacultyData.map((faculty) => [
-      faculty.faculty_id.trim(),
-      faculty.faculty_name?.trim() || null,
-      faculty.department?.trim() || null,
-      faculty.email.trim()
-    ]);
+    // **Sort faculty data numerically by faculty_id**
+validatedFacultyData.sort((a, b) => {
+  const numA = parseInt(a.faculty_id.replace(/\D/g, ""), 10); // Extracts 101 from "FAC101"
+  const numB = parseInt(b.faculty_id.replace(/\D/g, ""), 10);
+  return numA - numB; // Sort numerically
+});
+
+// **Prepare Data for Insertion**
+const values = validatedFacultyData.map((faculty) => [
+  faculty.faculty_id.trim(),
+  faculty.faculty_name?.trim() || null,
+  faculty.department?.trim() || null,
+  faculty.email.trim()
+]);
 
     // **Insert Data with Duplicate Key Update**
     const query = `
@@ -883,10 +920,9 @@ console.log("Type of facultyList:", typeof facultyList, Array.isArray(facultyLis
 
 // View faculty route
 app.get("/viewfacultycoord", authenticateToken, async (req, res) => {
-  // Now req.user is set from the token
   const user = req.user;
   if (!user || user.role.toLowerCase() !== "coordinator") {
-    return res.redirect("/login"); // Redirect if not logged in or unauthorized
+    return res.redirect("/login");
   }
   try {
     const [facultyList] = await db.promise().query(`
@@ -897,6 +933,7 @@ app.get("/viewfacultycoord", authenticateToken, async (req, res) => {
         END AS credentials_status
       FROM faculty f
       LEFT JOIN faculty_login fl ON f.email = fl.email
+      ORDER BY CAST(SUBSTRING(f.faculty_id, 4) AS UNSIGNED) ASC
     `);
     res.render("viewfacultycoord", { user, facultyList });
   } catch (error) {
@@ -1040,12 +1077,6 @@ app.delete("/delete-selected-faculty", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
 app.get("/result", async (req, res) => {
   try {
       // Fetch all student IDs
@@ -1079,25 +1110,6 @@ app.get("/result", async (req, res) => {
   }
 }); 
 
-// Backend Routes for Faculty-Student and Faculty-Skill Mapping
-
-app.get('/viewmapping', (req, res) => {
-  const query1 = 'SELECT * FROM faculty_student_mapping';
-  const query2 = 'SELECT * FROM faculty_skill_mapping';
-
-  db.query(query1, (err, studentResults) => {
-      if (err) throw err;
-
-      db.query(query2, (err, skillResults) => {
-          if (err) throw err;
-
-          res.render('viewmapping', {
-              facultyStudentMapping: studentResults,
-              facultySkillMapping: skillResults
-          });
-      });
-  });
-});
 // Delete a single student mapping
 app.post('/delete-student-viewmapping/:id', (req, res) => {
   const id = req.params.id;
@@ -1127,20 +1139,19 @@ app.post('/delete-skill-viewmapping/:id', (req, res) => {
 });
 
 // Delete selected student mappings
-app.post('/delete-selected-student-viewmapping', (req, res) => {
-  const ids = req.body.ids;
-  if (!ids || ids.length === 0) {
-      return res.status(400).json({ message: "No records selected" });
+app.post('/delete-selected', async (req, res) => {
+  try {
+    const { student_ids } = req.body;
+    if (!student_ids || student_ids.length === 0) {
+      return res.status(400).send('❌ No students selected.');
+    }
+    const placeholders = student_ids.map(() => '?').join(',');
+    await db.promise().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
+    res.send('✅ Selected students deleted successfully.');
+  } catch (err) {
+    console.error("❌ Error deleting students:", err);
+    res.status(500).send("❌ Database error.");
   }
-
-  const query = 'DELETE FROM faculty_student_mapping WHERE id IN (?)';
-  db.query(query, [ids], (err, result) => {
-      if (err) {
-          console.error("Error deleting selected student mappings:", err);
-          return res.status(500).json({ message: "Failed to delete selected student mappings" });
-      }
-      res.json({ message: "Selected student mappings deleted successfully", affectedRows: result.affectedRows });
-  });
 });
 
 // Delete selected skill mappings
@@ -1161,16 +1172,18 @@ app.post('/delete-selected-skill-viewmapping', (req, res) => {
 });
 
 // Delete all student mappings
-app.post('/delete-all-student-viewmapping', async (req, res) => {
+app.delete('/delete-all', async (req, res) => {
   try {
-    const query = 'DELETE FROM faculty_student_mapping';
-    const [result] = await db.promise().execute(query);
+    // First, delete all mappings to avoid foreign key constraint issues
+    await db.promise().query('DELETE FROM faculty_student_mapping');
 
-    res.json({ message: "✅ All student mappings deleted successfully", affectedRows: result.affectedRows });
+    // Then, delete all student records
+    await db.promise().query('DELETE FROM students');
 
+    res.send('✅ All students and their mappings deleted successfully.');
   } catch (err) {
-    console.error("❌ Error deleting all student mappings:", err);
-    res.status(500).json({ message: "❌ Failed to delete all student mappings" });
+    console.error("❌ Error deleting all students:", err);
+    res.status(500).send('❌ Failed to delete all students.');
   }
 });
 
@@ -1190,6 +1203,44 @@ app.post('/delete-all-skill-viewmapping', (req, res) => {
 
 
 app.get("/forgot-password", (req,res) => res.render("forgot-password"));
+
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).send("❌ Please provide an email.");
+  }
+
+  try {
+    // Check if the email exists in faculty_login table
+    const [user] = await db.promise().execute(
+      "SELECT * FROM faculty_login WHERE email = ?",
+      [email]
+    );
+
+    if (user.length === 0) {
+      return res.status(404).send("❌ Email not found in records.");
+    }
+
+    // Generate a new random password
+    const randomPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    // Update the new password in the database
+    await db.promise().execute(
+      "UPDATE faculty_login SET password = ? WHERE email = ?",
+      [hashedPassword, email]
+    );
+
+    // Send new credentials via email
+    await sendCredentials(email, email, randomPassword);
+
+    res.status(200).send("✅ New credentials sent to your email.");
+  } catch (error) {
+    console.error("❌ Error in forgot-password route:", error);
+    res.status(500).send("❌ Internal server error.");
+  }
+});
+
 
 app.post("/submit-mapping", upload.single("studentFile"), async (req, res) => {
   if (!req.file) return res.status(400).send("❌ No file uploaded.");

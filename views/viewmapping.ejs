@@ -232,6 +232,7 @@
               <th>Select</th>
               <th>ID</th>
               <th>Faculty ID</th>
+              <th>Faculty Name</th>
               <th>Student Name</th>
               <th>Skill</th>
               
@@ -248,6 +249,7 @@
                 />
               </td>
               <td><%= row.id %></td>
+              <td><%= row.faculty_id %></td>
               <td><%= row.faculty_name %></td>
               <td><%= row.student_name %></td>
               <td><%= row.skill_name %></td>
@@ -292,8 +294,9 @@
             <tr>
               <th>Select</th>
               <th>ID</th>
+              <th>Faculty ID</th>
               <th>Faculty Name</th>
-              <th>Skill Name</th>
+              <th>Skill</th>
               <!-- <th>Actions</th> -->
             </tr>
           </thead>
@@ -308,6 +311,7 @@
                 />
               </td>
               <td><%= row.id %></td>
+              <td><%= row.faculty_id %></td>
               <td><%= row.faculty_name %></td>
               <td><%= row.skill_name %></td>
               <!-- <td>

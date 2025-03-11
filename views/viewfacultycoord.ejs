@@ -92,16 +92,10 @@
                     Add Data
                   </a>
                   <div class="dropdown-menu">
-                    <a
-                      class="dropdown-item"
-                      href="/addstudent"
-                      id="addStudentLink"
-                      >Add Students</a
-                    >
+                    <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
                     <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
                   </div>
                 </li>
-
                 <li id="mappingBtn" class="nav-item">
                   <a class="nav-link" href="/mapping">Mapping</a>
                 </li>
@@ -116,15 +110,10 @@
                     Views
                   </a>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="/viewstudent"
-                      >View Student</a
-                    >
-                    <a class="dropdown-item" href="/viewmapping"
-                      >View Mapping</a
-                    >
+                    <a class="dropdown-item" href="/viewstudent">View Student</a>
+                    <a class="dropdown-item" href="/viewmapping">View Mapping</a>
                   </div>
                 </li>
-
                 <li id="downloadBtn" class="nav-item dropdown">
                   <a
                     class="nav-link dropdown-toggle"
@@ -138,26 +127,16 @@
                     Download Format
                   </a>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="/download-faculty"
-                      >Faculty Format</a
-                    >
-                    <a class="dropdown-item" href="/download-students"
-                      >Student Format</a
-                    >
-                    <a class="dropdown-item" href="/download-excel"
-                      >Mapping Format</a
-                    >
+                    <a class="dropdown-item" href="/download-faculty">Faculty Format</a>
+                    <a class="dropdown-item" href="/download-students">Student Format</a>
+                    <a class="dropdown-item" href="/download-excel">Mapping Format</a>
                   </div>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="/update-questionaire"
-                    >Update Questionaire</a
-                  >
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" onclick="confirmLogout()"
-                    >Logout</a
-                  >
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
                 </li>
               </ul>
             </div>
@@ -169,8 +148,7 @@
     <div class="container mt-4">
       <h2>Faculty List</h2>
       <p>
-        Use this interface to manage faculty members. You can search for a
-        faculty member, edit details, delete records, or send login credentials.
+        Use this interface to manage faculty members. You can search for a faculty member, edit details, delete records, or send login credentials.
       </p>
 
       <!-- Search Bar -->
@@ -182,29 +160,13 @@
         placeholder="Search by name, ID, or email..."
       />
 
-      <!-- Action Buttons with Explanations -->
+      <!-- Action Buttons -->
       <div class="action-buttons mb-3">
         <div class="btn-container">
-          <button
-            class="btn btn-danger"
-            id="deleteSelected"
-            title="Delete only selected faculty records"
-          >
-            Delete Selected
-          </button>
-          <button
-            class="btn btn-danger"
-            id="deleteAll"
-            title="Delete all faculty records permanently"
-          >
-            Delete All
-          </button>
+          <button class="btn btn-danger" id="deleteSelected" title="Delete only selected faculty records">Delete Selected</button>
+          <button class="btn btn-danger" id="deleteAll" title="Delete all faculty records permanently">Delete All</button>
         </div>
-        <button
-          class="btn btn-success"
-          onclick="sendCredentialsToAll()"
-          title="Send login credentials to all faculty members"
-        >
+        <button class="btn btn-success" onclick="sendCredentialsToAll()" title="Send login credentials to all faculty members">
           Send Credentials to All
         </button>
       </div>
@@ -227,44 +189,20 @@
           <tbody id="facultyTableBody">
             <% facultyList.forEach(faculty => { %>
             <tr>
-              <td><input type="checkbox" class="facultyCheckbox" /></td>
-              <td contenteditable="true" class="editable">
-                <%= faculty.faculty_id %>
-              </td>
-              <td contenteditable="true" class="editable">
-                <%= faculty.faculty_name %>
-              </td>
-              <td contenteditable="true" class="editable">
-                <%= faculty.department || 'N/A' %>
-              </td>
-              <td contenteditable="true" class="editable">
-                <%= faculty.email %>
-              </td>
+              <!-- Checkbox now holds the faculty_id as its value -->
+              <td><input type="checkbox" class="facultyCheckbox" value="<%= faculty.faculty_id %>" /></td>
+              <td contenteditable="true" class="editable"><%= faculty.faculty_id %></td>
+              <td contenteditable="true" class="editable"><%= faculty.faculty_name %></td>
+              <td contenteditable="true" class="editable"><%= faculty.department || 'N/A' %></td>
+              <td contenteditable="true" class="editable"><%= faculty.email %></td>
               <td>
                 <div class="btn-container">
-                  <button
-                    class="btn btn-primary btn-sm edit-btn"
-                    onclick="editRow(this)"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="btn btn-success btn-sm save-btn"
-                    onclick="saveRow(this)"
-                    disabled
-                  >
-                    Save
-                  </button>
+                  <button class="btn btn-primary btn-sm edit-btn" onclick="editRow(this)">Edit</button>
+                  <button class="btn btn-success btn-sm save-btn" onclick="saveRow(this)" disabled>Save</button>
                 </div>
               </td>
               <td>
-                <button
-                  class="btn btn-primary btn-sm"
-                  onclick="sendCredentials('<%= faculty.faculty_id %>', '<%= faculty.email %>')"
-                  title="Send credentials to this faculty"
-                >
-                  Send
-                </button>
+                <button class="btn btn-primary btn-sm" onclick="sendCredentials('<%= faculty.faculty_id %>', '<%= faculty.email %>')" title="Send credentials to this faculty">Send</button>
               </td>
               <td><%= faculty.credentials_status %></td>
             </tr>
@@ -293,22 +231,23 @@
 
         // Delete Selected Faculty
         $("#deleteSelected").click(function () {
-          let selectedRows = document.querySelectorAll(
-            ".facultyCheckbox:checked"
-          );
+          let selectedRows = document.querySelectorAll(".facultyCheckbox:checked");
           if (selectedRows.length === 0) {
             alert("❌ Please select at least one faculty to delete.");
             return;
           }
 
-          if (
-            !confirm("⚠️ Are you sure you want to delete the selected faculty?")
-          )
+          if (!confirm("⚠️ Are you sure you want to delete the selected faculty?"))
             return;
 
-          let selectedFaculty = Array.from(selectedRows).map((row) => ({
-            email: row.closest("tr").cells[4].innerText.trim(), // Assuming email is in 5th column
-          }));
+          // Collect both faculty_id and email from each selected row
+          let selectedFaculty = Array.from(selectedRows).map((checkbox) => {
+            const row = checkbox.closest("tr");
+            return {
+              faculty_id: checkbox.value, // from the checkbox value
+              email: row.cells[4].innerText.trim() // assuming email is in 5th cell (index 4)
+            };
+          });
 
           fetch("/delete-selected-faculty", {
             method: "DELETE",
@@ -319,9 +258,7 @@
             .then((data) => {
               alert(data.message);
               if (data.message.includes("✅")) {
-                selectedRows.forEach((checkbox) =>
-                  checkbox.closest("tr").remove()
-                );
+                selectedRows.forEach((checkbox) => checkbox.closest("tr").remove());
               }
             })
             .catch((error) => {
@@ -334,9 +271,7 @@
       // Edit Faculty Row
       function editRow(button) {
         const row = button.closest("tr");
-        row
-          .querySelectorAll(".editable")
-          .forEach((cell) => (cell.contentEditable = true));
+        row.querySelectorAll(".editable").forEach((cell) => (cell.contentEditable = true));
         row.querySelector(".save-btn").disabled = false;
       }
 
@@ -357,11 +292,9 @@
           .then((data) => {
             alert(data.message);
             if (data.success) {
-              row
-                .querySelectorAll(".editable")
-                .forEach((cell) => (cell.contentEditable = false));
+              row.querySelectorAll(".editable").forEach((cell) => (cell.contentEditable = false));
               button.disabled = true;
-              location.reload(); // Ensures the changes persist
+              location.reload(); // Ensure changes persist
             }
           })
           .catch((error) => {
@@ -390,35 +323,35 @@
             headers: { "Content-Type": "application/json" },
           })
             .then((response) => response.json())
-            .then((data) =>
-              alert(data.message || "❌ Error sending credentials")
-            )
+            .then((data) => alert(data.message || "❌ Error sending credentials"))
             .catch(() => alert("❌ Error sending credentials"));
         }
       }
+
       function confirmLogout() {
         if (confirm("Are you sure you want to logout?")) {
           window.location.href = "/logout";
         }
       }
-      document.getElementById("deleteAll").addEventListener("click", function () {
-    if (!confirm("⚠ Are you sure you want to delete ALL faculty records? This action cannot be undone!")) return;
 
-    fetch("/delete-all-faculty", {
-        method: "DELETE"
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        if (data.message.includes("✅")) {
-            location.reload();  // Reload page if deletion is successful
-        }
-    })
-    .catch(error => {
-        console.error("❌ Error deleting faculty:", error);
-        alert("❌ Failed to delete all faculty.");
-    });
-});
+      document.getElementById("deleteAll").addEventListener("click", function () {
+        if (!confirm("⚠ Are you sure you want to delete ALL faculty records? This action cannot be undone!")) return;
+
+        fetch("/delete-all-faculty", {
+          method: "DELETE"
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert(data.message);
+            if (data.message.includes("✅")) {
+              location.reload();
+            }
+          })
+          .catch(error => {
+            console.error("❌ Error deleting faculty:", error);
+            alert("❌ Failed to delete all faculty.");
+          });
+      });
     </script>
   </body>
 </html>
