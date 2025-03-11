@@ -296,7 +296,7 @@
               const date = record.conducted_date;
               if (!dateGroups[date]) {
                 dateGroups[date] = {
-                  totaltime: parseInt(record.totaltime) || 0,
+                  totaltime: parseFloat(record.totaltime) || 0,
                   rows: [],
                 };
               }
@@ -403,7 +403,7 @@
             .querySelectorAll(`.totalTimeInput[data-date="${today}"]`)
             .forEach((input) => {
               updatedData.totaltime[input.dataset.date] =
-                parseInt(input.value) || 0;
+                parseFloat(input.value) || 0;
             });
 
           console.log(

@@ -424,7 +424,7 @@ app.get("/studentdata", authenticateToken, async (req, res) => {
       try {
         const [filteredResults] = await db.promise().query(query, [facultyId, prn, skill]);
         // Calculate total time taken (if any results are returned)
-        const totalTimeTaken = filteredResults.length > 0 ? filteredResults[0].totaltime : 0;
+        const totalTimeTaken = filteredResults.length > 0 ? parseFloat(filteredResults[0].totaltime) : 0.0;
         return res.json({ filteredResults, totalTimeTaken });
       } catch (err) {
         console.error("Error fetching student data for PRN and skill:", err);

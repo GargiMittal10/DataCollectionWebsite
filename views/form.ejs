@@ -262,7 +262,7 @@
           const elapsedTime = Date.now() - startTime;
           const minutes = Math.floor(elapsedTime / 60000);
           const seconds = Math.floor((elapsedTime % 60000) / 1000);
-          const computedTotal = (minutes + seconds / 60).toFixed(2);
+          const computedTotal = parseFloat((minutes + seconds / 60).toFixed(2));
 
           totalTimeInput.value = computedTotal;
           timerDisplay.textContent = `Final Time: ${minutes} min ${seconds} sec`;
@@ -340,7 +340,7 @@
               <tr>
                 <td>${task.Qno}</td>
                 <td>${task.Question}</td>
-                <td><input type="radio" name="task${task.Qno}" value="1" required></td>
+                <td><input type="radio" name="task${task.Qno}" value="1" required checked></td>
                 <td><input type="radio" name="task${task.Qno}" value="0"></td>
               </tr>
             `;
