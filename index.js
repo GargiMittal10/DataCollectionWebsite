@@ -108,15 +108,15 @@ app.get('/coordinatordash', authenticateToken, async (req, res) => {
 
   try {
     // Fetch student count
-    const [studentRows] = await db.promise().execute("SELECT COUNT(*) AS count FROM students");
+    const [studentRows] = await db().execute("SELECT COUNT(*) AS count FROM students");
     const studentCount = studentRows[0].count || 0;
 
     // Fetch faculty count
-    const [facultyRows] = await db.promise().execute("SELECT COUNT(*) AS count FROM faculty");
+    const [facultyRows] = await db().execute("SELECT COUNT(*) AS count FROM faculty");
     const facultyCount = facultyRows[0].count || 0;
 
     // Fetch mapping count
-    const [mappingRows] = await db.promise().execute("SELECT COUNT(*) AS count FROM faculty_student_mapping");
+    const [mappingRows] = await db().execute("SELECT COUNT(*) AS count FROM faculty_student_mapping");
     const mappingCount = mappingRows[0].count || 0;
 
     res.render('coordinatordash', { 
@@ -200,7 +200,7 @@ app.get("/create-form", (req, res) => res.render("create-form"));
 app.get("/update-form", (req, res) => res.render("update-form"));
 app.get('/viewmapping', async (req, res) => {
   try {
-    const [facultyStudentMapping] = await db.promise().execute(`
+    const [facultyStudentMapping] = await db().execute(`
       SELECT 
         faculty_student_mapping.id,
         faculty_student_mapping.faculty_id,  
@@ -213,7 +213,7 @@ app.get('/viewmapping', async (req, res) => {
       LEFT JOIN skills ON faculty_student_mapping.skill_id = skills.skill_id;
     `);
     
-    const [facultySkillMapping] = await db.promise().execute(`
+    const [facultySkillMapping] = await db().execute(`
     SELECT 
     MIN(faculty_skill_mapping.id) AS id,  -- Pick the lowest ID per faculty-skill pair
     faculty_skill_mapping.faculty_id,  
@@ -277,7 +277,7 @@ app.post("/send-credentials", async (req, res) => {
       const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
 
       // Store hashed password in the database
-      await db.promise().query(
+      await db().query(
         "INSERT INTO faculty_login ( email, password,role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE password = VALUES(password)",
         [email, hashedPassword, role || "faculty"]
     );
@@ -325,7 +325,7 @@ app.post('/login', loginLimiter, async (req, res) => {
     if (role.toLowerCase() === "faculty") {
       let users;
       try {
-        [users] = await db.promise().execute("SELECT * FROM faculty_login WHERE email = ?", [email]);
+        [users] = await db().execute("SELECT * FROM faculty_login WHERE email = ?", [email]);
       } catch (dbError) {
         console.error("❌ Database query error:", dbError);
         return res.status(500).json({ error: "Database error. Try again later." });
@@ -389,7 +389,7 @@ app.get("/studentdata", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Username missing from token" });
     }
 
-    const [facultyResult] = await db.promise().query(
+    const [facultyResult] = await db().query(
       `SELECT faculty_id FROM faculty WHERE email = ?`, 
       [username]
     );
@@ -422,7 +422,7 @@ app.get("/studentdata", authenticateToken, async (req, res) => {
           AND r.skill_id = ?;
       `;
       try {
-        const [filteredResults] = await db.promise().query(query, [facultyId, prn, skill]);
+        const [filteredResults] = await db().query(query, [facultyId, prn, skill]);
         // Calculate total time taken (if any results are returned)
         const totalTimeTaken = filteredResults.length > 0 ? parseFloat(filteredResults[0].totaltime) : 0.0;
         return res.json({ filteredResults, totalTimeTaken });
@@ -435,7 +435,7 @@ app.get("/studentdata", authenticateToken, async (req, res) => {
     // If PRN or skill is missing, fetch available PRNs for selection
     const prnQuery = `SELECT DISTINCT student_id FROM results WHERE faculty_id = ?;`;
     try {
-      const [prnRows] = await db.promise().query(prnQuery, [facultyId]);
+      const [prnRows] = await db().query(prnQuery, [facultyId]);
       const availablePRNs = prnRows.map(row => row.student_id);
       res.render("studentdata", { availablePRNs, studentData: [] });
     } catch (error) {
@@ -455,7 +455,7 @@ app.get("/studentdata", authenticateToken, async (req, res) => {
 app.post("/send-credentials-all", async (req, res) => {
   try {
       // Fetch all faculty emails and IDs
-      const [facultyList] = await db.promise().query("SELECT email FROM faculty");
+      const [facultyList] = await db().query("SELECT email FROM faculty");
 
       if (facultyList.length === 0) {
           return res.status(404).json({ message: "❌ No faculty members found." });
@@ -470,7 +470,7 @@ app.post("/send-credentials-all", async (req, res) => {
 
           try {
               // Store the hashed password in the database
-              await db.promise().query(
+              await db().query(
                 "INSERT INTO faculty_login (email, password, role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE password = VALUES(password)",
                 [faculty.email, hashedPassword, faculty.role]
               );
@@ -496,7 +496,7 @@ app.post("/send-credentials-all", async (req, res) => {
 
 app.get('/getSkills', async (req, res) => {
   try {
-      const [rows] = await db.promise().query('SELECT DISTINCT skill_name FROM skills');
+      const [rows] = await db().query('SELECT DISTINCT skill_name FROM skills');
 
       if (rows.length === 0) {
           console.log("ℹ No skills found in the database.");
@@ -545,7 +545,7 @@ app.get("/viewfacultyadmin", authenticateToken, async (req, res) => {
   }
 
   try {
-      const [facultyList] = await db.promise().query(
+      const [facultyList] = await db().query(
           "SELECT faculty_id, faculty_name, email, department FROM faculty ORDER BY CAST(SUBSTRING(faculty_id, 4) AS UNSIGNED) ASC"
       );
       console.log("✅ Faculty list loaded successfully.");
@@ -560,7 +560,7 @@ app.get('/getStudentDetails/:student_id', async (req, res) => {
   const student_id = req.params.student_id;
 
   try {
-      const [student] = await db.promise().query("SELECT * FROM students WHERE student_id = ?", [student_id]);
+      const [student] = await db().query("SELECT * FROM students WHERE student_id = ?", [student_id]);
 
       if (student.length === 0) {
           return res.status(404).json({ error: 'Student not found' });
@@ -649,7 +649,7 @@ app.post("/upload-student", upload.single("studentFile"), async (req, res) => {
 
     if (values.length > 0) {
       try {
-        const [result] = await db.promise().query(
+        const [result] = await db().query(
           "INSERT INTO students (student_id, student_name, email, year, institute) VALUES ?",
           [values]
         );
@@ -682,7 +682,7 @@ app.post("/upload-student", upload.single("studentFile"), async (req, res) => {
 // Update viewstudent route
 app.get("/viewstudent", authenticateToken, async (req, res) => {
   try {
-      const [students] = await db.promise().query(
+      const [students] = await db().query(
           "SELECT student_id, student_name, email, year, institute FROM students"
       );
       // Pass req.user into the view as "user"
@@ -702,7 +702,7 @@ app.get("/viewstudentadmin", authenticateToken, async (req, res) => {
   }
 
   try {
-      const [students] = await db.promise().query(
+      const [students] = await db().query(
           "SELECT student_id, student_name, email, year, institute FROM students"
       );
 
@@ -719,7 +719,7 @@ app.get("/viewstudentadmin", authenticateToken, async (req, res) => {
 app.post('/update-student', async (req, res) => {
   const { student_id, student_name, email, year, institute } = req.body;
   try {
-      await db.promise().query(
+      await db().query(
           'UPDATE students SET student_name = ?, email = ?, year = ?, institute = ? WHERE student_id = ?',
           [student_name, email, year, institute, student_id]
       );
@@ -735,10 +735,10 @@ app.delete('/delete-student/:id', async (req, res) => {
 
   try {
     // First, delete the student from the mapping table to prevent foreign key constraint errors
-    await db.promise().query('DELETE FROM faculty_student_mapping WHERE student_id = ?', [studentID]);
+    await db().query('DELETE FROM faculty_student_mapping WHERE student_id = ?', [studentID]);
 
     // Now delete the student from the students table
-    const [result] = await db.promise().query('DELETE FROM students WHERE student_id = ?', [studentID]);
+    const [result] = await db().query('DELETE FROM students WHERE student_id = ?', [studentID]);
 
     if (result.affectedRows > 0) {
       res.send("✅ Student deleted successfully!");
@@ -763,10 +763,10 @@ app.post('/delete-selected', async (req, res) => {
     const placeholders = student_ids.map(() => '?').join(',');
 
     // First, delete students from the mapping table to prevent foreign key constraint errors
-    await db.promise().query(`DELETE FROM faculty_student_mapping WHERE student_id IN (${placeholders})`, student_ids);
+    await db().query(`DELETE FROM faculty_student_mapping WHERE student_id IN (${placeholders})`, student_ids);
     
     // Now, delete students from the students table
-    await db.promise().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
+    await db().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
 
     res.send('✅ Selected students deleted successfully.');
   } catch (err) {
@@ -780,10 +780,10 @@ app.post('/delete-selected', async (req, res) => {
 app.delete('/delete-all', async (req, res) => {
   try {
     // First, delete all student records from the mapping table to prevent foreign key constraint errors
-    await db.promise().query('DELETE FROM faculty_student_mapping');
+    await db().query('DELETE FROM faculty_student_mapping');
 
     // Now, delete all students from the students table
-    await db.promise().query('DELETE FROM students');
+    await db().query('DELETE FROM students');
 
     res.send('✅ All students deleted successfully.');
   } catch (err) {
@@ -884,7 +884,7 @@ const values = validatedFacultyData.map((faculty) => [
       email = VALUES(email)
     `;
 
-    const [result] = await db.promise().query(query, [values]);
+    const [result] = await db().query(query, [values]);
 
     if (result.affectedRows > 0) {
       return res.json({ success: "✅ Faculty data uploaded successfully!" });
@@ -905,7 +905,7 @@ const values = validatedFacultyData.map((faculty) => [
 
 app.get("/viewfaculty", async (req, res) => {
   try {
-      const [facultyList] = await db.promise().query("SELECT faculty_id, email FROM faculty");
+      const [facultyList] = await db().query("SELECT faculty_id, email FROM faculty");
 
       console.log("Retrieved Faculty List:", facultyList);
 console.log("Type of facultyList:", typeof facultyList, Array.isArray(facultyList));
@@ -925,7 +925,7 @@ app.get("/viewfacultycoord", authenticateToken, async (req, res) => {
     return res.redirect("/login");
   }
   try {
-    const [facultyList] = await db.promise().query(`
+    const [facultyList] = await db().query(`
       SELECT f.faculty_id, f.faculty_name, f.department, f.email, 
         CASE 
           WHEN fl.password IS NOT NULL THEN '✅ Credentials Sent'
@@ -954,7 +954,7 @@ app.put("/update-faculty", async (req, res) => {
       department = department || "N/A";
 
       // 🔹 Find the old email before updating
-      const [faculty] = await db.promise().query(
+      const [faculty] = await db().query(
           "SELECT email FROM faculty WHERE faculty_id = ?", [faculty_id]
       );
 
@@ -965,13 +965,13 @@ app.put("/update-faculty", async (req, res) => {
       const oldEmail = faculty[0].email;
 
       // 🔹 First update the faculty table
-      const [result] = await db.promise().query(
+      const [result] = await db().query(
           "UPDATE faculty SET faculty_name = ?, department = ?, email = ? WHERE faculty_id = ?",
           [faculty_name, department, email, faculty_id]
       );
 
       // 🔹 Then update the faculty_login table
-      await db.promise().query(
+      await db().query(
           "UPDATE faculty_login SET email = ? WHERE email = ?",
           [email, oldEmail]
       );
@@ -999,10 +999,10 @@ app.delete("/delete-faculty/:faculty_id/:email", async (req, res) => {
 
   try {
       // Delete from faculty_login first to prevent foreign key constraint error
-      await db.promise().query("DELETE FROM faculty_login WHERE email = ?", [email]);
+      await db().query("DELETE FROM faculty_login WHERE email = ?", [email]);
 
       // Now delete from faculty
-      const [result] = await db.promise().query(
+      const [result] = await db().query(
           "DELETE FROM faculty WHERE faculty_id = ? AND email = ?",
           [faculty_id, email]
       );
@@ -1023,14 +1023,14 @@ app.delete("/delete-faculty/:faculty_id/:email", async (req, res) => {
 app.delete("/delete-all-faculty", async (req, res) => {
   try {
       // Delete mappings first to prevent foreign key constraint errors
-      await db.promise().query("DELETE FROM faculty_student_mapping");
-      await db.promise().query("DELETE FROM faculty_skill_mapping");
+      await db().query("DELETE FROM faculty_student_mapping");
+      await db().query("DELETE FROM faculty_skill_mapping");
 
       // Delete faculty login records (optional: if login records exist)
-      await db.promise().query("DELETE FROM faculty_login");
+      await db().query("DELETE FROM faculty_login");
 
       // Now delete all faculty records
-      const [result] = await db.promise().query("DELETE FROM faculty");
+      const [result] = await db().query("DELETE FROM faculty");
 
       if (result.affectedRows > 0) {
           res.json({ message: "✅ All faculty records deleted successfully!" });
@@ -1055,13 +1055,13 @@ app.delete("/delete-selected-faculty", async (req, res) => {
   try {
     // Delete from faculty_login first
     const emailList = selectedFaculty.map(faculty => faculty.email);
-    await db.promise().query("DELETE FROM faculty_login WHERE email IN (?)", [emailList]);
+    await db().query("DELETE FROM faculty_login WHERE email IN (?)", [emailList]);
 
     // Now delete from faculty
     const whereClause = selectedFaculty.map(() => "(email = ?)").join(" OR ");
     const values = selectedFaculty.flatMap(faculty => [faculty.email]);
 
-    const [result] = await db.promise().query(
+    const [result] = await db().query(
       `DELETE FROM faculty WHERE ${whereClause}`,
       values
     );
@@ -1080,7 +1080,7 @@ app.delete("/delete-selected-faculty", async (req, res) => {
 app.get("/result", async (req, res) => {
   try {
       // Fetch all student IDs
-      const [students] = await db.promise().query("SELECT student_id FROM students");
+      const [students] = await db().query("SELECT student_id FROM students");
       const studentIdList = students.map(student => student.student_id);
 
       // Get student_id from query parameters
@@ -1089,7 +1089,7 @@ app.get("/result", async (req, res) => {
 
       // Fetch results only if studentId is provided
       if (studentId) {
-          [results] = await db.promise().query(`
+          [results] = await db().query(`
               SELECT 
                   s.student_name, 
                   sk.skill_name, 
@@ -1146,7 +1146,7 @@ app.post('/delete-selected', async (req, res) => {
       return res.status(400).send('❌ No students selected.');
     }
     const placeholders = student_ids.map(() => '?').join(',');
-    await db.promise().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
+    await db().query(`DELETE FROM students WHERE student_id IN (${placeholders})`, student_ids);
     res.send('✅ Selected students deleted successfully.');
   } catch (err) {
     console.error("❌ Error deleting students:", err);
@@ -1175,10 +1175,10 @@ app.post('/delete-selected-skill-viewmapping', (req, res) => {
 app.delete('/delete-all', async (req, res) => {
   try {
     // First, delete all mappings to avoid foreign key constraint issues
-    await db.promise().query('DELETE FROM faculty_student_mapping');
+    await db().query('DELETE FROM faculty_student_mapping');
 
     // Then, delete all student records
-    await db.promise().query('DELETE FROM students');
+    await db().query('DELETE FROM students');
 
     res.send('✅ All students and their mappings deleted successfully.');
   } catch (err) {
@@ -1212,7 +1212,7 @@ app.post("/forgot-password", async (req, res) => {
 
   try {
     // Check if the email exists in faculty_login table
-    const [user] = await db.promise().execute(
+    const [user] = await db().execute(
       "SELECT * FROM faculty_login WHERE email = ?",
       [email]
     );
@@ -1226,7 +1226,7 @@ app.post("/forgot-password", async (req, res) => {
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
     // Update the new password in the database
-    await db.promise().execute(
+    await db().execute(
       "UPDATE faculty_login SET password = ? WHERE email = ?",
       [hashedPassword, email]
     );
@@ -1291,14 +1291,14 @@ for (const row of rows) {
     console.log("✅ Extracted Skill IDs:", Array.from(skillIds));
 
     // 🔹 Fetch faculty names
-    const [facultyData] = await db.promise().query(
+    const [facultyData] = await db().query(
       "SELECT faculty_id, faculty_name FROM faculty WHERE faculty_id IN (?)",
       [Array.from(facultyIds)]
     );
     const facultyMap = Object.fromEntries(facultyData.map(row => [row.faculty_id, row.faculty_name]));
 
     // 🔹 Fetch student names
-    const [studentData] = await db.promise().query(
+    const [studentData] = await db().query(
       "SELECT student_id, student_name FROM students WHERE student_id IN (?)",
       [Array.from(studentIds)]
     );
@@ -1308,7 +1308,7 @@ for (const row of rows) {
     let skillMap = {}; // Default empty object
 
     if (skillIds.size > 0) {  // Run query only if skillIds is not empty
-        const [skillData] = await db.promise().query(
+        const [skillData] = await db().query(
             "SELECT skill_id, skill_name FROM skills WHERE skill_id IN (?)",
             [Array.from(skillIds)]
         );
@@ -1342,14 +1342,14 @@ for (const row of rows) {
 
     // 🔹 Insert Data if Validation Passed
     if (facultySkillInsertQueries.length > 0) {
-      await db.promise().query(
+      await db().query(
         "INSERT IGNORE INTO faculty_skill_mapping (faculty_id, skill_id) VALUES ?",
         [facultySkillInsertQueries]
       );
     }
 
     if (facultyStudentInsertQueries.length > 0) {
-      await db.promise().query(
+      await db().query(
         "INSERT IGNORE INTO faculty_student_mapping (faculty_id, student_id, skill_id) VALUES ?",
         [facultyStudentInsertQueries]
       );
@@ -1390,7 +1390,7 @@ app.get('/getFacultyName', async (req, res) => {
           return res.status(400).json({ error: "Invalid token: Email not found" });
       }
       const email = decoded.email;
-      const [rows] = await db.promise().execute(`
+      const [rows] = await db().execute(`
         SELECT faculty_name 
         FROM faculty 
         WHERE email = ?
@@ -1423,7 +1423,7 @@ app.get('/getFacultySkills', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Username missing from token" });
     }
 
-    const [facultyResult] = await db.promise().query(
+    const [facultyResult] = await db().query(
       `SELECT faculty_id FROM faculty WHERE email = ?`,
       [username]
     );
@@ -1434,8 +1434,8 @@ app.get('/getFacultySkills', authenticateToken, async (req, res) => {
 
     const facultyId = facultyResult[0].faculty_id; // Extract faculty_id
 
-    // Fetch skills based on faculty_id using promise() as well
-    const [skills] = await db.promise().query(
+    
+    const [skills] = await db().query(
       `SELECT distinct s.skill_id, s.skill_name 
        FROM faculty_skill_mapping fsm
        JOIN skills s ON fsm.skill_id = s.skill_id
@@ -1462,7 +1462,7 @@ app.get('/getStudentsBySkill/:skill_id', authenticateToken, async (req, res) => 
     }
 
     // Query faculty table for the faculty_id
-    const [facultyResult] = await db.promise().query(
+    const [facultyResult] = await db().query(
       `SELECT faculty_id FROM faculty WHERE email = ?`,
       [username]
     );
@@ -1474,7 +1474,7 @@ app.get('/getStudentsBySkill/:skill_id', authenticateToken, async (req, res) => 
     const facultyId = facultyResult[0].faculty_id; // Extract faculty_id
 
     // Fetch students mapped to this faculty for the selected skill
-    const [students] = await db.promise().query(
+    const [students] = await db().query(
       `SELECT s.student_id, s.student_name
        FROM faculty_student_mapping fsm
        JOIN students s ON fsm.student_id = s.student_id
@@ -1491,7 +1491,7 @@ app.get('/getStudentsBySkill/:skill_id', authenticateToken, async (req, res) => 
 
 app.get('/fetch-questions/:skillId', async (req, res) => {
   try {
-    const [rows] = await db.promise().execute(
+    const [rows] = await db().execute(
       'SELECT * FROM evaluation_questions WHERE skill_id = ?', 
       [req.params.skillId]
     );
@@ -1512,8 +1512,8 @@ app.post('/submit-results', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Username missing from token" });
     }
 
-    // Use db.promise().query and enclose the query in backticks.
-    const [facultyResult] = await db.promise().query(
+
+    const [facultyResult] = await db().query(
       `SELECT faculty_id FROM faculty WHERE email = ?`, 
       [username]
     );
@@ -1531,7 +1531,7 @@ app.post('/submit-results', authenticateToken, async (req, res) => {
         INSERT INTO Results (student_id, faculty_id, skill_id, Qno, totaltime, conducted_time, Result, conducted_date)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      await db.promise().query(query, [student_id, faculty_id, skill_id, Qno, totaltime, conducted_time, Result, conducted_date]);
+      await db().query(query, [student_id, faculty_id, skill_id, Qno, totaltime, conducted_time, Result, conducted_date]);
     }
 
     res.status(200).json({ message: "Results successfully saved!" });
@@ -1555,7 +1555,7 @@ app.put("/updateStudentData", async (req, res) => {
       }
 
       // Ensure student exists before updating
-      const [existingStudent] = await db.promise().query(
+      const [existingStudent] = await db().query(
           "SELECT * FROM results WHERE student_id = ? AND conducted_date = ?;",
           [prn, conductedDate]
       );
@@ -1565,7 +1565,7 @@ app.put("/updateStudentData", async (req, res) => {
       }
 
       for (const answer of updatedAnswers) {
-          await db.promise().query(
+          await db().query(
               "UPDATE results SET Result = ? WHERE student_id = ? AND qno = ? AND conducted_date = ?;",
               [answer.result, prn, answer.qno, conductedDate]
           );
@@ -1574,7 +1574,7 @@ app.put("/updateStudentData", async (req, res) => {
       if (totaltime && typeof totaltime[conductedDate] !== "undefined") {
           const totalTimeValue = totaltime[conductedDate];
 
-          await db.promise().query(
+          await db().query(
               "UPDATE results SET totaltime = ? WHERE student_id = ? AND conducted_date = ?;",
               [totalTimeValue, prn, conductedDate]
           );
@@ -1610,7 +1610,7 @@ app.get('/student-details/:prn', async (req, res) => {
 
 async function getNextSkillId() {
     try {
-        const [rows] = await db.promise().query('SELECT MAX(skill_id) AS max_id FROM skills');
+        const [rows] = await db().query('SELECT MAX(skill_id) AS max_id FROM skills');
         return (rows[0].max_id || 0) + 1;
     } catch (error) {
         console.error("Error getting next skill ID:", error);
@@ -1629,8 +1629,7 @@ app.post('/add-skill', upload.single('questionFile'), async (req, res) => {
     try {
         const skillId = await getNextSkillId();
 
-        // ✅ Use db.promise().query() for async support
-        await db.promise().query('INSERT INTO skills (skill_id, skill_name) VALUES (?, ?)', [skillId, skillName]);
+        await db().query('INSERT INTO skills (skill_id, skill_name) VALUES (?, ?)', [skillId, skillName]);
 
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
@@ -1638,7 +1637,7 @@ app.post('/add-skill', upload.single('questionFile'), async (req, res) => {
 
         for (let row of sheetData) {
             if (row.Qno && row.Question) {
-                await db.promise().query(
+                await db().query(
                     'INSERT INTO evaluation_questions (Qno, Question, skill_id) VALUES (?, ?, ?)',
                     [row.Qno, row.Question, skillId]
                 );
@@ -1655,7 +1654,7 @@ app.post('/add-skill', upload.single('questionFile'), async (req, res) => {
 
 app.get("/api/skills", async (req, res) => {
   try {
-    const [rows] = await db.promise().query("SELECT * FROM skills");
+    const [rows] = await db().query("SELECT * FROM skills");
     res.json(rows); // e.g. [{skill_id:1, skill_name:'Skill One'}, ...]
   } catch (error) {
     console.error(error);
@@ -1670,7 +1669,7 @@ app.get("/api/evaluation-questions", async (req, res) => {
   }
 
   try {
-    const [rows] = await db.promise().query(
+    const [rows] = await db().query(
       "SELECT Qno, Question, skill_id FROM evaluation_questions WHERE skill_id = ?",
       [skillId]
     );
@@ -1693,7 +1692,7 @@ app.post("/api/evaluation-questions", async (req, res) => {
 
   try {
     // Insert question with user-supplied Qno
-    const [result] = await db.promise().query(
+    const [result] = await db().query(
       "INSERT INTO evaluation_questions (Qno, Question, skill_id) VALUES (?, ?, ?)",
       [qno, question, skill_id]
     );
@@ -1717,7 +1716,7 @@ app.put("/api/evaluation-questions/:oldQno", async (req, res) => {
 
   try {
     // Update Qno and Question
-    const [result] = await db.promise().query(
+    const [result] = await db().query(
       "UPDATE evaluation_questions SET Qno = ?, Question = ? WHERE Qno = ?",
       [newQno, question, oldQno]
     );
@@ -1739,7 +1738,7 @@ app.delete("/api/evaluation-questions/:qno", async (req, res) => {
   const { qno } = req.params;
 
   try {
-    const [result] = await db.promise().query(
+    const [result] = await db().query(
       "DELETE FROM evaluation_questions WHERE Qno = ?",
       [qno]
     );
