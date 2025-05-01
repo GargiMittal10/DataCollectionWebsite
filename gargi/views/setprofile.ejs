@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Set Profile</title>
+  <link rel="stylesheet" href="/css/login.css" />
+  <style>
+    form {
+      max-width: 400px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .signup-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #020230;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="text-align: center;">Set Your Profile</h2>
+    <form id="setProfileForm">
+      <input type="text" id="name" placeholder="Your Full Name" required />
+      <input type="text" id="studentId" placeholder="Student ID" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+      <button type="submit" class="signup-btn">Signup</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("setProfileForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const studentId = document.getElementById("studentId").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+      }
+
+      fetch("/set-profile", {
+  method: "POST",
+  credentials: "include", // 👈 Needed for session to work!
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name, studentId, password })
+})
+.then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // ✅ Store token and redirect to dashboard
+        localStorage.setItem("auth_token", data.token);
+        window.location.href = data.redirectUrl;
+      } else {
+        alert(data.error || "Something went wrong.");
+      }
+    })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("An error occurred.");
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flashcards Review</title>
+  <link rel="stylesheet" href="/css/bootstrap.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      background-color: #020230;
+      font-family: Arial, sans-serif;
+      color: #020230;
+    }
+
+    .card-container {
+      width: 90%;
+      max-width: 600px;
+      margin: 100px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+      color: black;
+    }
+
+    .flashcard {
+      display: none;
+      text-align: center;
+    }
+
+    .flashcard.active {
+      display: block;
+    }
+
+    h3 {
+      color: #020230;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #000000;
+    }
+
+    button {
+      background-color: #020230;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #151551;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 100px;
+      font-size: 22px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .video-container {
+      margin-top: 20px;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <% if (message) { %>
+    <div class="message"><%= message %></div>
+  <% } else { %>
+    <div class="card-container">
+      <% flashcards.forEach((fc, index) => { %>
+        <div class="flashcard <%= index === 0 ? 'active' : '' %>">
+          <h3>Skill: <%= fc.skill_name %> | Session: <%= fc.session_no %></h3>
+          <p><strong>Question <%= fc.Qno %>:</strong></p>
+          <p><%= fc.Question %></p>
+
+          <% if (fc.videoUrl) { %>
+            <div class="video-container">
+              <h4>Watch Video:</h4>
+              <video controls>
+                <source src="<%= fc.videoUrl %>" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          <% } %>
+
+          <button onclick="nextFlashcard(<%= index %>)">Next</button>
+        </div>
+      <% }); %>
+    </div>
+
+    <script>
+      function nextFlashcard(currentIndex) {
+        const cards = document.querySelectorAll('.flashcard');
+        cards[currentIndex].classList.remove('active');
+        if (currentIndex + 1 < cards.length) {
+          cards[currentIndex + 1].classList.add('active');
+        } else {
+          alert('End of flashcards. Practice more to improve!');
+        }
+      }
+    </script>
+  <% } %>
+
+</body>
+</html>

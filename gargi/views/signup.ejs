@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signup Page</title>
+    <link rel="stylesheet" href="/css/login.css" />
+    <style>
+      .role-dropdown {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .role-dropdown label {
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .role-select {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: none;
+        background: #f3f3f3;
+      }
+      .illustration-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #020230;
+        flex: 1;
+      }
+      .img-box img {
+        max-width: 100%;
+        height: auto;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Left Section (Signup Form) -->
+      <div class="login-section">
+        <img src="/images/symbilogo.jpg" alt="Logo" class="logo" />
+        <h2>Sign up for an account</h2>
+        <form id="signupForm">
+          <input
+            type="email"
+            id="signupEmail"
+            name="email"
+            placeholder="Enter your email"
+            required
+          />
+          <button type="button" id="verifyBtn">Verify</button>
+
+          <div id="otpSection" class="hidden">
+            <input
+              type="text"
+              id="otp"
+              name="otp"
+              placeholder="Enter OTP"
+              required
+            />
+            <a id="resendOtp" href="#" style="color: blue; cursor: pointer;">Resend OTP</a>
+            <button type="submit" class="login-btn">Register</button>
+            
+          </div>
+        </form>
+      </div>
+
+      <!-- Right Section (Illustration) -->
+      <div class="illustration-section">
+        <div class="img-box">
+          <img src="/images/slider-img.png" alt="Signup Illustration" />
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      document.getElementById("verifyBtn").addEventListener("click", function () {
+        const email = document.getElementById("signupEmail").value.trim();
+        if (!email) {
+          alert("Please enter your email.");
+          return;
+        }
+    
+        fetch("/verify-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.exists) {
+              alert("Verification email sent. Please check your inbox for the OTP.");
+              document.getElementById("otpSection").classList.remove("hidden");
+            } else {
+              alert("Student not identified. Please use a registered email.");
+            }
+          })
+          .catch((err) => {
+            console.error("Verification error:", err);
+            alert("An error occurred while verifying the email.");
+          });
+      });
+    
+      // ✅ Form submission (OTP verification + registration)
+      document.getElementById("signupForm").addEventListener("submit", function (e) {
+        e.preventDefault(); // prevent default form submit
+    
+        const email = document.getElementById("signupEmail").value.trim();
+        const otp = document.getElementById("otp").value.trim();
+    
+        if (!email || !otp) {
+          alert("Please fill in both email and OTP.");
+          return;
+        }
+    
+        fetch("/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              alert("Registration successful!");
+              window.location.href = data.redirectUrl; // e.g., "/welcome"
+            } else {
+              alert(data.error || "Failed to verify OTP.");
+            }
+          })
+          .catch(err => {
+            console.error("Signup error:", err);
+            alert("An error occurred during registration.");
+          });
+      });
+    
+      // ✅ Resend OTP functionality
+      document.getElementById("resendOtp").addEventListener("click", function (e) {
+        e.preventDefault();
+        const email = document.getElementById("signupEmail").value.trim();
+        if (!email) {
+          alert("Please enter your email before resending OTP.");
+          return;
+        }
+    
+        fetch("/verify-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.exists) {
+              alert("A new OTP has been sent.");
+            } else {
+              alert("Email not found.");
+            }
+          })
+          .catch((err) => {
+            console.error("Resend OTP error:", err);
+            alert("Error while resending OTP.");
+          });
+      });
+    </script>
+    
+  </body>
+</html>

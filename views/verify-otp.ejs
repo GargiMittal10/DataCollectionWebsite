@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify OTP</title>
+  <link rel="stylesheet" href="/css/login.css" />
+  <style>
+    .form-box {
+      max-width: 400px;
+      margin: auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input[type="text"], button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Enter OTP</h2>
+    <form id="otpForm">
+      <input type="text" name="otp" placeholder="Enter the OTP sent to your email" required />
+      <button type="submit">Verify OTP</button>
+      <div class="error" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("otpForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const otp = e.target.otp.value;
+
+      fetch("/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otp })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = data.redirectUrl;
+          } else {
+            document.getElementById("errorMsg").textContent = data.error;
+          }
+        });
+    });
+  </script>
+</body>
+</html>

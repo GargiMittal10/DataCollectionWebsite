@@ -1,0 +1,124 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Student Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f8f8f8;
+        }
+        h1 {
+            margin: 20px 0;
+        }
+        .dropdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px; 
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #020230;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>View Student Details</h1>
+
+    <br><br>
+
+    <div class="dropdown-container">
+        <!-- PRN Dropdown -->
+        <label for="student_id">Student ID</label>
+        <select name="student_id" id="student_id" class="form-control" required>
+            <option value="" disabled selected>Select Student ID</option>
+            <% if (studentIdList && studentIdList.length > 0) { %>
+                <% studentIdList.forEach(student_id => { %>
+                    <option value="<%= student_id %>"><%= student_id %></option>
+                <% }); %>
+            <% } else { %>
+                <option value="" disabled>No Student IDs available</option>
+            <% } %>
+        </select>
+
+        <!-- Skill Dropdown (Fetching from Database) -->
+        <label for="skill">Select Skill</label>
+<select name="skill" id="skill" class="form-control" required>
+    <option value="" disabled selected>Select Skill</option>
+</select>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/getSkills')
+            .then(response => response.json())
+            .then(data => {
+                const skillDropdown = document.getElementById("skill");
+                if (data.skills && data.skills.length > 0) {
+                    data.skills.forEach(skill => {
+                        const option = document.createElement("option");
+                        option.value = skill;
+                        option.textContent = skill;
+                        skillDropdown.appendChild(option);
+                    });
+                } else {
+                    skillDropdown.innerHTML = '<option value="" disabled>No Skills available</option>';
+                }
+            })
+            .catch(error => console.error('❌ Error fetching skills:', error));
+    });
+</script>
+
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Questions</th>
+                <th>Semester 1 Performance</th>
+                <th>Semester 2 Performance</th>
+                <th>Semester 3 Performance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let i = 0; i < 20; i++) { %> 
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+</body>
+</html>

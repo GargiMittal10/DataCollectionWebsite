@@ -1,0 +1,145 @@
+<div class="chart-section">
+    <h1 class="chart-title">Task Completion Overview</h1>
+    <p style="text-align: center;">Visual breakdown of task completion status across sessions and skills.</p>
+  
+    <!-- Row: Session + Skill Donuts -->
+    <div class="chart-row">
+      <!-- Concentric Donut -->
+      <div class="chart-wrapper session-chart">
+        <h3>Session-wise Completion</h3>
+        <canvas id="sessionCompletion" width="400" height="400"></canvas>
+  
+        <div style="margin-top: 15px; text-align: left; font-size: 14px;">
+          <div><strong style="color: #E9CCB1;">●</strong> Session 1</div>
+          <div><strong style="color: #C0B1E9;">●</strong> Session 2</div>
+          <div><strong style="color: #B1E9C6;">●</strong> Session 3</div>
+        </div>
+      </div>
+  
+      <!-- Skill Donuts -->
+      <% skillStats.forEach((skill) => { %>
+        <div class="chart-wrapper skill-chart">
+          <h3>Skill <%= skill.skill_id %></h3>
+          <canvas id="skill-<%= skill.skill_id %>" width="250" height="250"></canvas>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+  
+  <!-- Styles -->
+  <style>
+    .chart-title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+  
+    .chart-wrapper {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+  
+    .session-chart {
+      width: 400px;
+    }
+  
+    .skill-chart {
+      width: 250px;
+    }
+  
+    canvas {
+      margin-top: 10px;
+    }
+  
+    .session-chart div {
+      line-height: 1.5;
+    }
+  </style>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Chart Scripts -->
+  <script>
+    // Concentric Sessions Donut
+    const sessionData = <%- JSON.stringify(sessionStats) %>;
+    const sessionCtx = document.getElementById('sessionCompletion').getContext('2d');
+  
+    new Chart(sessionCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Completed', 'Not Completed'],
+        datasets: [
+          {
+            label: 'Session 1',
+            data: [sessionData[0]?.completed || 0, sessionData[0]?.not_completed || 0],
+            backgroundColor: ['#E9CCB1', '#D3C4BE'],
+            borderWidth: 1,
+            radius: '90%',
+            cutout: '70%'
+          },
+          {
+            label: 'Session 2',
+            data: [sessionData[1]?.completed || 0, sessionData[1]?.not_completed || 0],
+            backgroundColor: ['#C0B1E9', '#B1D1E9'],
+            borderWidth: 1,
+            radius: '70%',
+            cutout: '50%'
+          },
+          {
+            label: 'Session 3',
+            data: [sessionData[2]?.completed || 0, sessionData[2]?.not_completed || 0],
+            backgroundColor: ['#B1E9C6', '#E9B1CC'],
+            borderWidth: 1,
+            radius: '50%',
+            cutout: '30%'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return `${ctx.dataset.label}: ${ctx.label} - ${ctx.raw}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  
+    // Skill Donuts
+    <% skillStats.forEach((skill) => { %>
+      const ctxSkill<%= skill.skill_id %> = document.getElementById('skill-<%= skill.skill_id %>').getContext('2d');
+      new Chart(ctxSkill<%= skill.skill_id %>, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Not Completed'],
+          datasets: [{
+            data: [<%= skill.completed %>, <%= skill.not_completed %>],
+            backgroundColor: ['#E9CCB1', '#D3C4BE'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    <% }) %>
+  </script>
+  

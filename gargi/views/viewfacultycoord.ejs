@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Site Metas -->
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>View Faculty</title>
+    <!-- CSS Links -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #020230;
+        color: #020230;
+      }
+      .container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        color: black;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #020230;
+      }
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      .btn-container {
+        display: flex;
+        gap: 5px;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/coordinatordash">
+              <span>
+                <img
+                  src="/images/symbilogo.jpg"
+                  alt="Logo"
+                  class="logo"
+                  style="width: 50px; height: auto"
+                />
+              </span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+            >
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="addDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                  >
+                    Add Data
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
+                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                  </div>
+                </li>
+                <li id="mappingBtn" class="nav-item">
+                  <a class="nav-link" href="/mapping">Mapping</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="viewsDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                  >
+                    Views
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewstudent">View Student</a>
+                    <a class="dropdown-item" href="/viewmapping">View Mapping</a>
+                  </div>
+                </li>
+                <li id="downloadBtn" class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="downloadDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    Download Format
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/download-faculty">Faculty Format</a>
+                    <a class="dropdown-item" href="/download-students">Student Format</a>
+                    <a class="dropdown-item" href="/download-excel">Mapping Format</a>
+                  </div>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+
+    <div class="container mt-4">
+      <h2>Faculty List</h2>
+      <p>
+        Use this interface to manage faculty members. You can search for a faculty member, edit details, delete records, or send login credentials.
+      </p>
+
+      <!-- Search Bar -->
+      <label for="facultySearch"><strong>Search Faculty:</strong></label>
+      <input
+        type="text"
+        id="facultySearch"
+        class="form-control mb-3"
+        placeholder="Search by name, ID, or email..."
+      />
+
+      <!-- Action Buttons -->
+      <div class="action-buttons mb-3">
+        <div class="btn-container">
+          <button class="btn btn-danger" id="deleteSelected" title="Delete only selected faculty records">Delete Selected</button>
+          <button class="btn btn-danger" id="deleteAll" title="Delete all faculty records permanently">Delete All</button>
+        </div>
+        <button class="btn btn-success" onclick="sendCredentialsToAll()" title="Send login credentials to all faculty members">
+          Send Credentials to All
+        </button>
+      </div>
+
+      <!-- Faculty Table -->
+      <div class="table-container">
+        <table class="table table-bordered table-striped text-center">
+          <thead class="thead-dark">
+            <tr>
+              <th></th>
+              <th>Faculty ID</th>
+              <th>Faculty Name</th>
+              <th>Department</th>
+              <th>Email</th>
+              <th>Actions</th>
+              <th>Send Credentials</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="facultyTableBody">
+            <% facultyList.forEach(faculty => { %>
+            <tr>
+              <!-- Checkbox now holds the faculty_id as its value -->
+              <td><input type="checkbox" class="facultyCheckbox" value="<%= faculty.faculty_id %>" /></td>
+              <td contenteditable="true" class="editable"><%= faculty.faculty_id %></td>
+              <td contenteditable="true" class="editable"><%= faculty.faculty_name %></td>
+              <td contenteditable="true" class="editable"><%= faculty.department || 'N/A' %></td>
+              <td contenteditable="true" class="editable"><%= faculty.email %></td>
+              <td>
+                <div class="btn-container">
+                  <button class="btn btn-primary btn-sm edit-btn" onclick="editRow(this)">Edit</button>
+                  <button class="btn btn-success btn-sm save-btn" onclick="saveRow(this)" disabled>Save</button>
+                </div>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="sendCredentials('<%= faculty.faculty_id %>', '<%= faculty.email %>')" title="Send credentials to this faculty">Send</button>
+              </td>
+              <td><%= faculty.credentials_status %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Search Faculty
+        $("#facultySearch").on("keyup", function () {
+          var value = $(this).val().toLowerCase();
+          $("#facultyTableBody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+          });
+        });
+
+        // Select All Checkboxes
+        $("#selectAll").click(function () {
+          $(".facultyCheckbox").prop("checked", this.checked);
+        });
+
+        // Delete Selected Faculty
+        $("#deleteSelected").click(function () {
+          let selectedRows = document.querySelectorAll(".facultyCheckbox:checked");
+          if (selectedRows.length === 0) {
+            alert("❌ Please select at least one faculty to delete.");
+            return;
+          }
+
+          if (!confirm("⚠️ Are you sure you want to delete the selected faculty?"))
+            return;
+
+          // Collect both faculty_id and email from each selected row
+          let selectedFaculty = Array.from(selectedRows).map((checkbox) => {
+            const row = checkbox.closest("tr");
+            return {
+              faculty_id: checkbox.value, // from the checkbox value
+              email: row.cells[4].innerText.trim() // assuming email is in 5th cell (index 4)
+            };
+          });
+
+          fetch("/delete-selected-faculty", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ selectedFaculty }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.message);
+              if (data.message.includes("✅")) {
+                selectedRows.forEach((checkbox) => checkbox.closest("tr").remove());
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error deleting faculty:", error);
+              alert("❌ Failed to delete selected faculty.");
+            });
+        });
+      });
+
+      // Edit Faculty Row
+      function editRow(button) {
+        const row = button.closest("tr");
+        row.querySelectorAll(".editable").forEach((cell) => (cell.contentEditable = true));
+        row.querySelector(".save-btn").disabled = false;
+      }
+
+      // Save Faculty Row
+      function saveRow(button) {
+        const row = button.closest("tr");
+        const faculty_id = row.cells[1].innerText.trim();
+        const faculty_name = row.cells[2].innerText.trim();
+        const department = row.cells[3].innerText.trim();
+        const email = row.cells[4].innerText.trim();
+
+        fetch("/update-faculty", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ faculty_id, faculty_name, department, email }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            alert(data.message);
+            if (data.success) {
+              row.querySelectorAll(".editable").forEach((cell) => (cell.contentEditable = false));
+              button.disabled = true;
+              location.reload(); // Ensure changes persist
+            }
+          })
+          .catch((error) => {
+            console.error("❌ Error updating faculty:", error);
+            alert("❌ Failed to update faculty.");
+          });
+      }
+
+      // Send Credentials to Individual Faculty
+      function sendCredentials(facultyId, email) {
+        fetch("/send-credentials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ facultyId, email }),
+        })
+          .then((response) => response.json())
+          .then((data) => alert(data.message || "❌ Error sending credentials"))
+          .catch(() => alert("❌ Error sending credentials"));
+      }
+
+      // Send Credentials to All Faculty
+      function sendCredentialsToAll() {
+        if (confirm("⚠️ Send credentials to all faculty?")) {
+          fetch("/send-credentials-all", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((response) => response.json())
+            .then((data) => alert(data.message || "❌ Error sending credentials"))
+            .catch(() => alert("❌ Error sending credentials"));
+        }
+      }
+
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+        }
+      }
+
+      document.getElementById("deleteAll").addEventListener("click", function () {
+        if (!confirm("⚠ Are you sure you want to delete ALL faculty records? This action cannot be undone!")) return;
+
+        fetch("/delete-all-faculty", {
+          method: "DELETE"
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert(data.message);
+            if (data.message.includes("✅")) {
+              location.reload();
+            }
+          })
+          .catch(error => {
+            console.error("❌ Error deleting faculty:", error);
+            alert("❌ Failed to delete all faculty.");
+          });
+      });
+    </script>
+  </body>
+</html>

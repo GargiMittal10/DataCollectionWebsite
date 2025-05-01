@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Add Faculty Data</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+
+    <style>
+      body {
+        background-color: #020230;
+        color: #020230;
+      }
+      .container-box {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        color: black;
+        max-width: 600px;
+        margin: 50px auto;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #020230;
+      }
+      .dropdown-menu .dropdown-item:hover {
+        background-color: transparent; /* Keep the background unchanged */
+        color: #ffc107; /* Change this to the color you want for the text */
+      }
+    </style>
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/coordinatordash">
+              <img
+                src="/images/symbilogo.jpg"
+                alt="Logo"
+                class="logo"
+                style="width: 50px; height: auto"
+              />
+            </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li id="mappingBtn" class="nav-item">
+                  <a class="nav-link" href="/addstudent">Add Student</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/mapping">Mapping</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="viewsDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    >Views</a
+                  >
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewstudent"
+                      >View Students</a
+                    >
+                    <a class="dropdown-item" href="/viewfacultycoord"
+                      >View Faculty</a
+                    >
+                    <a class="dropdown-item" href="/viewmapping"
+                      >View Mapping</a
+                    >
+                  </div>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/download-excel">Download Format</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire"
+                    >Update Questionnaire</a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()"
+                    >Logout</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+
+    <section class="admin_section layout_padding">
+      <div class="container-box">
+        <h2>Add Faculty Data</h2>
+        <form id="facultyForm" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="facultyFile"
+              >Upload Faculty List (Excel .xlsx or .csv)</label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="facultyFile"
+              name="facultyFile"
+              required
+              accept=".xlsx, .csv"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Upload
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- JavaScript Dependencies -->
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- SheetJS for Excel parsing -->
+
+    <script>
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/login";
+        }
+      }
+
+      document
+        .getElementById("facultyForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const fileInput = document.getElementById("facultyFile");
+          const file = fileInput.files[0];
+
+          if (
+            !file ||
+            (!file.name.endsWith(".xlsx") && !file.name.endsWith(".csv"))
+          ) {
+            alert("❌ Please upload a valid Excel (.xlsx) or CSV (.csv) file.");
+            return;
+          }
+
+          const isValidEmails = await validateEmails(file);
+          const isValidData = await validateFileData(file);
+
+          if (!isValidEmails || !isValidData) return;
+
+          const formData = new FormData();
+          formData.append("facultyFile", file);
+
+          try {
+            const response = await fetch("/upload-faculty", {
+              method: "POST",
+              body: formData,
+            });
+
+            console.log("Response Status:", response.status);
+
+            // Handle non-OK responses (e.g., 400, 500 errors)
+            if (!response.ok) {
+              const errorText = await response.text(); // Get raw error message
+              console.error("Server Error Response:", errorText);
+              alert(`❌ Server Error: ${response.status} - ${errorText}`);
+              return;
+            }
+
+            const data = await response.json(); // Convert response to JSON
+            console.log("Server Response:", data);
+
+            alert(data.success || "✅ File uploaded successfully!");
+          } catch (error) {
+            console.error("Fetch Error:", error);
+            alert(
+              "❌ Error connecting to the server. Check console for details."
+            );
+          }
+        });
+
+      function validateEmails(file) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const data = event.target.result;
+            let emails = [];
+
+            if (file.name.endsWith(".csv")) {
+              const lines = data
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line);
+              const headers = lines[0].split(",");
+              const emailIndex = headers.findIndex((header) =>
+                /email/i.test(header.trim())
+              );
+
+              if (emailIndex === -1) {
+                alert("❌ No email column found in the file!");
+                return resolve(false);
+              }
+
+              emails = lines
+                .slice(1)
+                .map((line) => {
+                  const columns = line.split(",");
+                  return columns.length > emailIndex
+                    ? columns[emailIndex].trim()
+                    : null;
+                })
+                .filter((email) => email);
+            } else if (file.name.endsWith(".xlsx")) {
+              const workbook = XLSX.read(data, { type: "binary" });
+              const sheet = workbook.Sheets[workbook.SheetNames[0]];
+              const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+              const headers = jsonData[0];
+              const emailIndex = headers.findIndex((header) =>
+                /email/i.test(header.trim())
+              );
+
+              if (emailIndex === -1) {
+                alert("❌ No email column found in the file!");
+                return resolve(false);
+              }
+
+              emails = jsonData
+                .slice(1)
+                .map((row) =>
+                  row.length > emailIndex ? row[emailIndex]?.trim() : null
+                )
+                .filter((email) => email);
+            }
+
+            resolve(checkEmailFormat(emails));
+          };
+          reader.readAsBinaryString(file);
+        });
+      }
+
+      function checkEmailFormat(emails) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const seenEmails = new Set();
+
+        for (let i = 0; i < emails.length; i++) {
+          const email = emails[i];
+
+          if (!emailRegex.test(email)) {
+            alert(`❌ Invalid email format found: ${email} (Row ${i + 2})`);
+            return false;
+          }
+
+          if (seenEmails.has(email)) {
+            alert(`❌ Duplicate email found: ${email} (Row ${i + 2})`);
+            return false;
+          }
+
+          seenEmails.add(email);
+        }
+
+        return true;
+      }
+      function validateFileData(file) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const data = event.target.result;
+            let rows = [];
+
+            if (file.name.endsWith(".csv")) {
+              const lines = data
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line);
+              const headers = lines[0].split(",");
+
+              rows = lines
+                .slice(1)
+                .map((line) => line.split(",").map((col) => col.trim()));
+            } else if (file.name.endsWith(".xlsx")) {
+              const workbook = XLSX.read(data, { type: "binary" });
+              const sheet = workbook.Sheets[workbook.SheetNames[0]];
+              const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+              rows = jsonData
+                .slice(1)
+                .map((row) =>
+                  row.map((col) => (col ? col.toString().trim() : ""))
+                );
+            }
+
+            resolve(checkForDuplicates(rows));
+          };
+          reader.readAsBinaryString(file);
+        });
+      }
+
+      function checkForDuplicates(rows) {
+        const seen = new Set();
+
+        for (let i = 0; i < rows.length; i++) {
+          const rowString = JSON.stringify(rows[i].map((col) => col.trim())); // Trim each cell to avoid whitespace issues
+
+          if (seen.has(rowString)) {
+            alert(
+              `❌ Duplicate row found at line ${i + 2}: ${rows[i].join(", ")}`
+            );
+            return false;
+          }
+
+          seen.add(rowString);
+        }
+
+        return true;
+      }
+    </script>
+  </body>
+</html>

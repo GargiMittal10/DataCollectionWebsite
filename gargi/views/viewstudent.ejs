@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Site Metas -->
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>View Students</title>
+    <!-- CSS Links -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #020230;
+        color: #020230;
+      }
+      .container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        color: black;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #020230;
+      }
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      .btn-container {
+        display: flex;
+        gap: 5px;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
+
+      .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .sticky-header th {
+        position: sticky;
+        top: 0;
+        background: #343a40;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/coordinatordash">
+              <span>
+                <img
+                  src="/images/symbilogo.jpg"
+                  alt="Logo"
+                  class="logo"
+                  style="width: 50px; height: auto"
+                />
+              </span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+            >
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="addDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                  >
+                    Add Data
+                  </a>
+                  <div class="dropdown-menu">
+                    <a
+                      class="dropdown-item"
+                      href="/addstudent"
+                      id="addStudentLink"
+                      >Add Students</a
+                    >
+                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                  </div>
+                </li>
+
+                <li id="mappingBtn" class="nav-item">
+                  <a class="nav-link" href="/mapping">Mapping</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="viewsDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                  >
+                    Views
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewfacultycoord"
+                      >View Faculty</a
+                    >
+                    <a class="dropdown-item" href="/viewmapping"
+                      >View Mapping</a
+                    >
+                  </div>
+                </li>
+
+                <li id="downloadBtn" class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="downloadDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    Download Format
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/download-faculty"
+                      >Faculty Format</a
+                    >
+                    <a class="dropdown-item" href="/download-students"
+                      >Student Format</a
+                    >
+                    <a class="dropdown-item" href="/download-excel"
+                      >Mapping Format</a
+                    >
+                  </div>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire"
+                    >Update Questionaire</a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()"
+                    >Logout</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+
+    <div class="container mt-5">
+      <h2 class="mb-4">Student List</h2>
+      <p>
+        Efficiently handle student data. Use the search function, directly edit
+        records by clicking on a row, and remove entries.
+      </p>
+
+      <!-- Search Bar -->
+      <label for="facultySearch"><strong>Search Student:</strong></label>
+      <input
+        type="text"
+        id="searchBar"
+        class="form-control mb-3"
+        placeholder="Search by Student ID or Email"
+      />
+
+      <!-- Action Buttons -->
+      <button class="btn btn-danger mb-3" onclick="deleteSelected()">
+        Delete Selected
+      </button>
+      <button class="btn btn-danger mb-3" onclick="deleteAll()">
+        Delete All
+      </button>
+
+      <!-- Student Table -->
+      <div class="table-container">
+        <table class="table table-bordered">
+          <thead class="sticky-header">
+            <tr>
+              <th>Select</th>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Email</th>
+              <th>Year</th>
+              <th>Institute</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <% students.forEach(student => { %>
+            <tr>
+              <td><input type="checkbox" class="selectCheckbox" /></td>
+              <td><%= student.student_id %></td>
+              <td contenteditable="true"><%= student.student_name %></td>
+              <td contenteditable="true"><%= student.email %></td>
+              <td contenteditable="true"><%= student.year %></td>
+              <td contenteditable="true"><%= student.institute %></td>
+              <td>
+                <button
+                  class="btn btn-success"
+                  onclick="updateStudent('<%= student.student_id %>', this)"
+                >
+                  Save
+                </button>
+                <button
+                  class="btn btn-danger"
+                  onclick="deleteStudent('<%= student.student_id %>')"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("searchBar")
+        .addEventListener("input", function () {
+          const searchValue = this.value.toLowerCase();
+          const rows = document.querySelectorAll("#studentTableBody tr");
+
+          rows.forEach((row) => {
+            const studentID = row.cells[1].innerText.toLowerCase();
+            const email = row.cells[3].innerText.toLowerCase();
+            row.style.display =
+              studentID.includes(searchValue) || email.includes(searchValue)
+                ? ""
+                : "none";
+          });
+        });
+
+      function updateStudent(studentID, btn) {
+        const row = btn.closest("tr");
+        const student_name = row.cells[2].innerText;
+        const email = row.cells[3].innerText;
+        const year = row.cells[4].innerText;
+        const institute = row.cells[5].innerText;
+
+        fetch("/update-student", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student_id: studentID,
+            student_name,
+            email,
+            year,
+            institute,
+          }),
+        })
+          .then((response) => response.text())
+          .then(alert);
+      }
+
+      // Delete a single student
+      function deleteStudent(studentID) {
+        if (confirm("Are you sure you want to delete this student?")) {
+          fetch("/delete-student/" + studentID, {
+            method: "DELETE",
+          })
+            .then((response) => response.text())
+            .then(alert)
+            .then(() => location.reload());
+        }
+      }
+
+      // Delete selected students
+      function deleteSelected() {
+        const selectedIDs = [];
+        const checkboxes = document.querySelectorAll(".selectCheckbox:checked");
+
+        checkboxes.forEach((checkbox) => {
+          const row = checkbox.closest("tr");
+          const studentID = row.cells[1].innerText;
+          selectedIDs.push(studentID);
+        });
+
+        if (selectedIDs.length === 0) {
+          alert("Please select at least one student to delete.");
+          return;
+        }
+
+        if (confirm("Are you sure you want to delete the selected students?")) {
+          fetch("/delete-selected", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ student_ids: selectedIDs }),
+          })
+            .then((response) => response.text())
+            .then(alert)
+            .then(() => location.reload());
+        }
+      }
+
+      // Delete all students
+      function deleteAll() {
+        if (confirm("Are you sure you want to delete ALL students?")) {
+          fetch("/delete-all", {
+            method: "DELETE",
+          })
+            .then((response) => response.text())
+            .then(alert)
+            .then(() => location.reload());
+        }
+      }
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+        }
+      }
+    </script>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+  </body>
+</html>
+<<<<<<< HEAD
+=======
+
+>>>>>>> d546910899da8d3724a5c8c93f4cc518de48ed4e

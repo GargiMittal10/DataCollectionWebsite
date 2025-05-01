@@ -1,0 +1,65 @@
+    
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f8f8f8;
+        }
+        h1 {
+            margin: 20px 0;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #020230;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Faculty Data</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Faculty ID</th>
+                <th>Teaches</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (typeof facultyList !== "undefined" && facultyList.length > 0) { %>
+                <% facultyList.forEach(faculty => { %>
+                    <tr>
+                        <td><%= faculty.faculty_id %></td>
+                        <td><%= faculty.teaches %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="2">No faculty data available</td>
+                </tr>
+            <% } %>            
+        </tbody>                 
+    </table>
+</body>
+</html>

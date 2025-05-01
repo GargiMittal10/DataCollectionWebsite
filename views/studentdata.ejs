@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <title>Student Data Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/viewstudents.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      /* Combined CSS from the first file and the second file */
+      body {
+        background-color: #020230;
+        color: white;
+      }
+      .container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        color: black;
+        display: block !important;
+        visibility: visible !important;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #020230;
+      }
+      table.table {
+        background-color: white;
+      }
+      table.table th,
+      table.table td {
+        color: black;
+      }
+      .btn.btn-primary,
+      .btn.btn-success {
+        background-color: #008cba !important;
+        border: none !important;
+        color: #fff !important;
+        padding: 10px 25px !important;
+        font-size: 16px !important;
+        cursor: pointer;
+        border-radius: 6px !important;
+      }
+    </style>
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/faculty-dashboard">
+              <span>
+                <span>
+                  <img
+                    src="/images/symbilogo.jpg"
+                    alt="Symbiosis Logo"
+                    style="width: 50px; height: auto"
+                  />
+                </span>
+              </span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+            >
+              <span class=""> </span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/faculty-dashboard">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewforms">Take Evaluation</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="facultyDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span id="facultyName">Loading...</span>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="facultyDropdown">
+                    <a class="dropdown-item text-danger" href="/logout"
+                      >Logout</a
+                    >
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <div class="container mt-5">
+        <!-- Header row with title and buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="mb-0">STUDENT DATA</h2>
+          <div>
+            <button id="editBtn" class="btn btn-primary mr-2">Edit</button>
+            <button id="saveChangesBtn" class="btn btn-success" disabled>
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Skill Selection -->
+        <div class="form-group">
+          <label for="skillSelect">Select Skill:</label>
+          <select id="skillSelect" class="form-control">
+            <option value="" disabled selected>Loading skills...</option>
+          </select>
+        </div>
+
+        <!-- PRN Selection -->
+        <div class="form-group">
+          <label for="prnSelect">Select Student PRN:</label>
+          <select id="prnSelect" class="form-control" disabled>
+            <option value="" disabled selected>Select skill first</option>
+          </select>
+        </div>
+
+        <!-- Table to display student data -->
+        <table class="table table-bordered table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>Student Name</th>
+              <th>Question</th>
+              <th>Answered</th>
+              <th>Conducted Date</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- Data will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          alert("Unauthorized access! Please log in.");
+          window.location.href = "/login";
+          return;
+        }
+
+        const skillSelect = document.getElementById("skillSelect");
+        const prnSelect = document.getElementById("prnSelect");
+        const studentTableBody = document.getElementById("studentTableBody");
+        const saveChangesBtn = document.getElementById("saveChangesBtn");
+        const editBtn = document.getElementById("editBtn");
+        const today = new Date().toISOString().split("T")[0];
+
+        // Global editing mode flag
+        let editingMode = false;
+
+        saveChangesBtn.addEventListener("click", saveChanges);
+        editBtn.addEventListener("click", function () {
+          editingMode = true;
+          // Re-render table with editable fields for today's date
+          loadStudentData();
+          saveChangesBtn.disabled = false;
+        });
+
+        async function fetchFacultyData() {
+          try {
+            const response = await fetch("/getFacultyName", {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await response.json();
+            document.getElementById("facultyName").textContent =
+              data.facultyName || "Faculty";
+          } catch (error) {
+            console.error("Error fetching faculty name:", error);
+            document.getElementById("facultyName").textContent =
+              "Error Loading";
+          }
+        }
+
+        async function fetchSkills() {
+          try {
+            const response = await fetch("/getFacultySkills", {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const skills = await response.json();
+            skillSelect.innerHTML =
+              '<option value="" disabled selected>Select Skill</option>';
+            skills.forEach((skill) => {
+              const option = document.createElement("option");
+              option.value = skill.skill_id;
+              option.textContent = skill.skill_name;
+              skillSelect.appendChild(option);
+            });
+          } catch (error) {
+            console.error("Error fetching faculty skills:", error);
+            skillSelect.innerHTML =
+              '<option value="" disabled>Error loading skills</option>';
+          }
+        }
+
+        skillSelect.addEventListener("change", async function () {
+          const selectedSkill = skillSelect.value;
+          if (!selectedSkill) return;
+          prnSelect.innerHTML =
+            '<option value="" disabled selected>Loading PRNs...</option>';
+          prnSelect.disabled = true;
+
+          try {
+            const response = await fetch(
+              `/getStudentsBySkill/${selectedSkill}`,
+              {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            const students = await response.json();
+            prnSelect.innerHTML =
+              '<option value="" disabled selected>Select PRN</option>';
+            students.forEach((student) => {
+              const option = document.createElement("option");
+              option.value = student.student_id;
+              option.textContent = `${student.student_name} (${student.student_id})`;
+              prnSelect.appendChild(option);
+            });
+
+            prnSelect.disabled = false;
+          } catch (error) {
+            console.error("Error fetching students:", error);
+            prnSelect.innerHTML =
+              '<option value="" disabled>Error loading PRNs</option>';
+          }
+        });
+
+        prnSelect.addEventListener("change", async function () {
+          editingMode = false; // Reset editing mode each time a new PRN is selected
+          saveChangesBtn.disabled = true;
+          await loadStudentData();
+        });
+
+        async function loadStudentData() {
+          const selectedPRN = prnSelect.value;
+          const selectedSkill = skillSelect.value;
+          if (!selectedPRN || !selectedSkill) return;
+
+          try {
+            // Append both PRN and skill as query parameters
+            const response = await fetch(
+              `/studentdata?prn=${selectedPRN}&skill=${selectedSkill}`,
+              {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+
+            const data = await response.json();
+            studentTableBody.innerHTML = "";
+
+            if (data.filteredResults.length === 0) {
+              studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center">No student data available</td></tr>`;
+              return;
+            }
+
+            // Sort by conducted date descending
+            data.filteredResults.sort(
+              (a, b) => new Date(b.conducted_date) - new Date(a.conducted_date)
+            );
+
+            // Group by date
+            const dateGroups = {};
+            data.filteredResults.forEach((record) => {
+              const date = record.conducted_date;
+              if (!dateGroups[date]) {
+                dateGroups[date] = {
+                  totaltime: parseFloat(record.totaltime) || 0,
+                  rows: [],
+                };
+              }
+              dateGroups[date].rows.push(record);
+            });
+
+            // Sort the date keys descending
+            const sortedDates = Object.keys(dateGroups).sort(
+              (a, b) => new Date(b) - new Date(a)
+            );
+
+            // Render table rows for each date group
+            sortedDates.forEach((date) => {
+              const group = dateGroups[date];
+
+              group.rows.forEach((student) => {
+                // Render cell as dropdown if editingMode is enabled and date is today
+                let answeredCellContent;
+                if (editingMode && date === today) {
+                  answeredCellContent = `
+    <select class="answerSelect"
+            data-student-id="${student.student_id}"
+            data-qno="${student.Qno}"
+            data-date="${student.conducted_date}">
+      <option value="1" ${
+        student.Result == 1 ? "selected" : ""
+      }>Completed</option>
+      <option value="0" ${
+        student.Result == 0 ? "selected" : ""
+      }>Not Completed</option>
+    </select>
+  `;
+                } else {
+                  answeredCellContent =
+                    student.Result == 1 ? "Completed" : "Not Completed";
+                }
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+          <td>${student.student_name}</td>
+          <td>${student.Question}</td>
+          <td>${answeredCellContent}</td>
+          <td>${student.conducted_date}</td>
+        `;
+                studentTableBody.appendChild(row);
+              });
+
+              // Display total time row for each date group
+              let totalTimeCellContent;
+              if (
+                editingMode &&
+                date === new Date().toISOString().split("T")[0]
+              ) {
+                totalTimeCellContent = `
+          <div class="input-group">
+            <input type="number"
+                   class="form-control totalTimeInput"
+                   data-date="${date}"
+                   value="${group.totaltime}">
+            <div class="input-group-append">
+              <span class="input-group-text">minutes</span>
+            </div>
+          </div>
+        `;
+              } else {
+                totalTimeCellContent = group.totaltime + " minutes";
+              }
+
+              const totalTimeRow = document.createElement("tr");
+              totalTimeRow.innerHTML = `
+        <td colspan="2" class="text-right font-weight-bold">Total Time:</td>
+        <td colspan="2">${totalTimeCellContent}</td>
+      `;
+              studentTableBody.appendChild(totalTimeRow);
+            });
+          } catch (error) {
+            console.error("Error fetching student data:", error);
+          }
+        }
+
+        async function saveChanges() {
+          const selectedPRN = prnSelect.value;
+          if (!selectedPRN) return;
+
+          const updatedData = {
+            prn: selectedPRN,
+            updatedAnswers: [],
+            totaltime: {},
+          };
+
+          // Collect data only from today's date if in editing mode
+          document
+            .querySelectorAll(`.answerSelect[data-date="${today}"]`)
+            .forEach((select) => {
+              updatedData.updatedAnswers.push({
+                student_id: selectedPRN,
+                qno: select.dataset.qno,
+                result: parseInt(select.value),
+                conducted_date: select.dataset.date,
+              });
+            });
+
+          document
+            .querySelectorAll(`.totalTimeInput[data-date="${today}"]`)
+            .forEach((input) => {
+              updatedData.totaltime[input.dataset.date] =
+                parseFloat(input.value) || 0;
+            });
+
+          console.log(
+            "JSON Data being sent to backend:",
+            JSON.stringify(updatedData, null, 2)
+          );
+
+          try {
+            const response = await fetch("/updateStudentData", {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(updatedData),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+              alert("Changes saved successfully!");
+              editingMode = false;
+              saveChangesBtn.disabled = true;
+              await loadStudentData();
+            } else {
+              alert(
+                "Failed to save changes: " + (result.message || "Unknown error")
+              );
+            }
+          } catch (error) {
+            console.error("Error updating data:", error);
+          }
+        }
+        // Initial load
+        await fetchFacultyData();
+        await fetchSkills();
+      });
+    </script>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>

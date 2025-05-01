@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charts Overview</title>
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet" />
+  <link href="/css/responsive.css" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-base.min.js"></script>
+
+  <style>
+    body {
+      background-color: #020230;
+      color: #fff; /* Ensure text is readable */
+    }
+
+    .navbar-nav .nav-item {
+      margin-right: 20px;
+    }
+
+    .navbar-nav .nav-link {
+      color: white !important;
+      font-weight: 500;
+    }
+
+    /* Chart 1: Bell-Style Bar Chart */
+    .chart-container {
+      width: 100%;
+      max-width: 500px; /* Adjust max-width for smaller size */
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 20px 15px;
+      margin-bottom: 30px;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .chart-header h4 {
+      color: #67B7D1;
+      font-size: 0.9rem;
+    }
+
+    .chart-header h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-top: 5px;
+    }
+
+    .chart-header p {
+      color: #888;
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+
+    .bell-chart {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 350px; /* Adjust height for smaller display */
+      position: relative;
+    }
+
+    .bell {
+      position: relative;
+      width: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .curve {
+      width: 100%;
+      border-radius: 20px 20px 0 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .marker {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .x-axis {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+
+    .x-axis-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-bottom: 6px;
+    }
+
+    .x-axis-item p {
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    .tooltip {
+      position: absolute;
+      background-color: #fff;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      border-radius: 5px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      display: none;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Chart 2: Task Completion Overview */
+    .chart-title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .chart-wrapper {
+      background-color: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      margin-bottom: 40px;
+      width: 300px;
+    }
+
+    .session-chart {
+      width: 300px;
+    }
+
+    .skill-chart {
+      width: 300px;
+    }
+
+    canvas {
+      margin-top: 10px;
+      width: 100% !important; /* Ensure canvas takes up the full width */
+      height: auto;
+    }
+
+    .session-chart div {
+      line-height: 1.5;
+    }
+
+    /* Centering the Bell Chart */
+    .charts-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px; /* Adds space between the charts */
+      max-width: 1200px; /* Sets a max width for larger screens */
+      margin: 0 auto;
+      flex-wrap: wrap; /* Ensures charts wrap on smaller screens */
+    }
+
+    /* Bell Chart Container */
+    .bell-chart-container {
+      width: 48%; /* Adjust width to fit the container */
+      max-width: 550px;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* Time Progression Chart Container */
+#container {
+  width: 48%;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: center;
+  background-color: white;           /* Optional: background for contrast */
+  border-radius: 20px;               /* Rounded corners */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Optional: elevation */
+  padding: 20px;                     /* Optional: inner spacing */
+}
+
+    .kpi-cards {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .kpi-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      width: 30%;
+      font-size: 1.2rem;
+    }
+
+    .kpi-card h3 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .kpi-card p {
+      font-size: 1.1rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+    <div>
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <span>
+              <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+            </span>
+
+            <a class="navbar-brand" href="/"> </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""> </span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/studentdash">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/table">View Results</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/dashboard">Visualise Results</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link"href="/chatbot">My Chatbot</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+  <div class="kpi-cards">
+
+    <div class="kpi-card">
+      <h3><%= !isNaN(Number(averageScore)) ? Number(averageScore).toFixed(2) : '0.00' %></h3>
+      <p>Average Score</p>
+    </div>
+
+    <div class="kpi-card">
+      <h3><%= totalTimeSpent %> mins</h3>
+      <p>Total Time Spent</p>
+    </div>
+    <div class="kpi-card">
+      <h3><%= rankInfo.rank %> / <%= rankInfo.totalStudents %></h3>
+      <p>Your Rank</p>
+    </div>
+
+    <div class="kpi-card">
+      <h3><%= percentile %>th</h3>
+      <p>Percentile</p>
+    </div>
+  </div>
+  <div class="chart-section">
+    <h1 class="chart-title">Task Completion Overview</h1>
+    <p style="text-align: center;">Visual breakdown of task completion status across sessions and skills.</p>
+
+    <div class="chart-row">
+      <div class="chart-wrapper session-chart">
+        <h3>Session-wise Completion</h3>
+        <canvas id="sessionCompletion" width="400" height="400"></canvas>
+
+        <div style="margin-top: 15px; text-align: left; font-size: 14px;">
+          <div><strong style="color: #E9CCB1;">●</strong> Session 1</div>
+          <div><strong style="color: #C0B1E9;">●</strong> Session 2</div>
+          <div><strong style="color: #B1E9C6;">●</strong> Session 3</div>
+        </div>
+      </div>
+
+      <% skillStats.forEach((skill) => { %>
+        <div class="chart-wrapper skill-chart">
+          <h3>Skill <%= skill.skill_id %></h3>
+          <canvas id="skill-<%= skill.skill_id %>" width="250" height="250"></canvas>
+        </div>
+      <% }) %>
+
+    </div>
+  </div>
+
+  <div class="charts-container">
+
+    <div class="bell-chart-container">
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>Average Time per Skill</h2>
+        </div>
+
+        <div class="bell-chart" id="bellChart"></div>
+        <div class="x-axis" id="xAxis"></div>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+    </div>
+
+    <div id="container"></div>
+
+  </div>
+  <script>
+
+    // Bell-Style Bar Chart Script
+    const data = <%- JSON.stringify(chartData) %>;
+    const bellChart = document.getElementById('bellChart');
+    const xAxis = document.getElementById('xAxis');
+    const tooltip = document.getElementById('tooltip');
+
+    const colors = [
+      '#EBCFC4', '#E9CCB1', '#D3C4BE', '#E4DAC2',
+      '#F4EEE1', '#C4BDAC', '#EFEEEE', '#E8E6D9'
+    ];
+
+    data.skills.forEach((skill, i) => {
+      const percentage = data.avgTimes[i];
+      const color = colors[i % colors.length];
+
+      const bell = document.createElement('div');
+      bell.className = 'bell';
+
+      const marker = document.createElement('div');
+      marker.className = 'marker';
+      marker.style.backgroundColor = color;
+      marker.textContent = `${percentage.toFixed(1)}m`;
+
+      const curve = document.createElement('div');
+      curve.className = 'curve';
+      curve.style.backgroundColor = color;
+      curve.style.height = `${percentage * 30}px`;
+
+      bell.appendChild(marker);
+      bell.appendChild(curve);
+      bellChart.appendChild(bell);
+
+      const xItem = document.createElement('div');
+      xItem.className = 'x-axis-item';
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.backgroundColor = color;
+      const label = document.createElement('p');
+      label.textContent = skill;
+
+      xItem.appendChild(dot);
+      xItem.appendChild(label);
+      xAxis.appendChild(xItem);
+
+      bell.addEventListener('mouseenter', () => {
+        tooltip.innerHTML = `<strong>Skill ${skill}</strong>: ${percentage.toFixed(1)} minutes`;
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${bell.getBoundingClientRect().left + window.scrollX}px`;
+        tooltip.style.top = `${bell.getBoundingClientRect().top + window.scrollY - 40}px`;
+      });
+
+      bell.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+    });
+
+    // Task Completion Overview Script
+    const sessionData = <%- JSON.stringify(sessionStats) %>;
+    const sessionCtx = document.getElementById('sessionCompletion').getContext('2d');
+
+    new Chart(sessionCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Completed', 'Not Completed'],
+        datasets: [
+          {
+            label: 'Session 1',
+            data: [sessionData[0]?.completed || 0, sessionData[0]?.not_completed || 0],
+            backgroundColor: ['#E9CCB1', '#D3C4BE'],
+            borderWidth: 1,
+            radius: '90%',
+            cutout: '70%'
+          },
+          {
+            label: 'Session 2',
+            data: [sessionData[1]?.completed || 0, sessionData[1]?.not_completed || 0],
+            backgroundColor: ['#C0B1E9', '#B1D1E9'],
+            borderWidth: 1,
+            radius: '70%',
+            cutout: '50%'
+          },
+          {
+            label: 'Session 3',
+            data: [sessionData[2]?.completed || 0, sessionData[2]?.not_completed || 0],
+            backgroundColor: ['#B1E9C6', '#E9B1CC'],
+            borderWidth: 1,
+            radius: '50%',
+            cutout: '30%'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return `${ctx.dataset.label}: ${ctx.label} - ${ctx.raw}`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Skill Donuts
+    <% skillStats.forEach((skill) => { %>
+      const ctxSkill<%= skill.skill_id %> = document.getElementById('skill-<%= skill.skill_id %>').getContext('2d');
+      new Chart(ctxSkill<%= skill.skill_id %>, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Not Completed'],
+          datasets: [{
+            data: [<%= skill.completed %>, <%= skill.not_completed %>],
+            backgroundColor: ['#E9CCB1', '#D3C4BE'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    <% }) %>;
+
+    // Time Progression Chart Script
+    const chartData = <%- JSON.stringify(timeProgressionChartData || []) %>;
+const skillLabels = <%- JSON.stringify(timeProgressionSkills || []) %>;
+const fixedColors = ['#FF5733', '#3375FF', '#28B463'];
+
+    function getData() {
+    const data = [];
+    for (let i = 0; i < skillLabels.length; i++) {
+        const row = [skillLabels[i]];
+        chartData.forEach(session => {
+        row.push(session.data[i]);
+        });
+        data.push(row);
+    }
+    return data;
+    }
+
+    anychart.onDocumentReady(function () {
+  const dataSet = anychart.data.set(getData());
+
+  const chart = anychart.line();
+  chart.animation(true);
+  chart.title("Time Progression Across Sessions");
+  chart.yAxis().title("Total Time (minutes)");
+  chart.xAxis().title("Skill ID");
+  chart.crosshair().enabled(true).yLabel(false).yStroke(null);
+  chart.legend().enabled(true);
+  
+
+  chartData.forEach((session, sessionIndex) => {
+    // Ensure you map the correct columns in the data
+    const seriesData = dataSet.mapAs({ x: 0, value: sessionIndex + 1 });
+    const series = chart.line(seriesData);
+    series.name(session.label);
+    series.stroke(`3 ${session.borderColor}`);
+    series.tooltip().format(`${session.label} : {%value} mins`);
+  });
+
+  chart.container("container");
+  chart.draw();
+});
+
+  </script>
+
+</body>
+</html>

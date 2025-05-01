@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Site Metas -->
+        <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+        <meta name="keywords" content="" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+    
+        <title>Result Details</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background-color: #020230;
+            color: #020230;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            color: black;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #020230;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .logged-in-info {
+            background: rgba(200, 200, 200, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 15px;
+            color: white;
+        }
+        .navbar-nav .nav-item {
+            margin-right: 20px;
+        }
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg custom_nav-container">
+        <span>
+            <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+        </span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active"><a class="nav-link" href="/admindash">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/viewfacultyadmin">Faculty List</a></li>
+                <li class="nav-item"><a class="nav-link" href="/viewstudentadmin">Student List</a></li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>View Results</h2>
+        <div class="dropdown-container">
+            <label for="student_id"><strong>Student ID:</strong></label>
+            <select name="student_id" id="student_id" required onchange="fetchResults()">
+                <option value="" disabled <%= !studentId ? "selected" : "" %>>Select Student ID</option>
+                <% if (studentIdList && studentIdList.length > 0) { %>
+                    <% studentIdList.forEach(id => { %>
+                        <option value="<%= id %>" <%= id == studentId ? "selected" : "" %>><%= id %></option>
+                    <% }); %>
+                <% } else { %>
+                    <option value="" disabled>No Student IDs available</option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-bordered table-striped text-center">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Skill</th>
+                        <th>Question</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (results.length > 0) { %>
+                        <% results.forEach(result => { %>
+                            <tr>
+                                <td><%= result.student_name %></td>
+                                <td><%= result.skill_name %></td>
+                                <td><%= result.Question %></td>
+                                <td><%= result.Result %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4">No results available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function fetchResults() {
+            const studentId = document.getElementById("student_id").value;
+            if (studentId) {
+                window.location.href = "/result?student_id=" + studentId;
+            }
+        }
+    </script>
+    <script>
+        function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            window.location.href = "/logout";
+        }
+    }
+    </script>
+</body>
+</html>

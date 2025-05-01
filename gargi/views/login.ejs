@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <link rel="stylesheet" href="/css/login.css" />
+    <style>
+      .role-dropdown {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .role-dropdown label {
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .role-select {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: none;
+        background: #f3f3f3;
+      }
+      .illustration-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #020230;
+        flex: 1;
+      }
+      .img-box img {
+        max-width: 100%;
+        height: auto;
+      }
+      .password-container {
+        position: relative;
+      }
+      .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 40%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 14px;
+        color: #007bff;
+      }
+      .toggle-password:hover {
+    text-decoration: underline;
+    font-weight: bold;
+    color: #0056b3; /* Slightly darker shade of the original blue */
+}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Left Section (Login Form) -->
+      <div class="login-section">
+        <img src="/images/symbilogo.jpg" alt="Logo" class="logo" />
+        <h2>Log in to your account</h2>
+        <form id="loginForm">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+          />
+          <div class="password-container">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter password"
+              required
+            />
+            <span class="toggle-password" onclick="togglePassword()" style="text-align: center; display: block;">Show</span>
+          </div>
+          <!-- Role Selection Dropdown -->
+          <div class="role-dropdown">
+            <label for="role">Select Role</label>
+            <select id="role" name="role" class="role-select" required>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+              <option value="coordinator">Coordinator</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
+
+          <div id="student-id-container" style="display: none;">
+            <input
+              type="text"
+              id="student_id"
+              name="student_id"
+              placeholder="Enter your student ID"
+              required
+            />
+          </div>
+
+          <div class="options">
+            <label class="remember-me">
+              <input type="checkbox" name="rememberMe" /> Remember Me
+            </label>
+            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+          </div>
+          <button type="submit" class="login-btn">Log In</button>
+        </form>
+      </div>
+      <!-- Right Section (Illustration) -->
+      <div class="illustration-section">
+        <div class="img-box">
+          <img src="/images/slider-img.png" alt="Admin Dashboard Image" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Client-side JavaScript -->
+    <script>
+      function togglePassword() {
+        const passwordField = document.getElementById("password");
+        const toggleButton = document.querySelector(".toggle-password");
+        if (passwordField.type === "password") {
+          passwordField.type = "text";
+          toggleButton.textContent = "Hide";
+        } else {
+          passwordField.type = "password";
+          toggleButton.textContent = "Show";
+        }
+      }
+    
+      document.addEventListener("DOMContentLoaded", function () {
+        const roleSelect = document.getElementById("role");
+        const studentIdContainer = document.getElementById("student-id-container");
+        const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+    
+        function handleRoleChange() {
+          const selectedRole = roleSelect.value;
+          const isStudent = selectedRole === "student";
+
+          studentIdContainer.style.display = isStudent ? "block" : "none";
+
+          const studentIdInput = document.getElementById("student_id");
+          if (isStudent) {
+            studentIdInput.setAttribute("required", "required");
+          } else {
+            studentIdInput.removeAttribute("required");
+          }
+
+          // Update forgot password link
+          if (selectedRole === "faculty") {
+            forgotPasswordLink.href = "/forgot-password";
+          } else if (selectedRole === "student") {
+            forgotPasswordLink.href = "/forgotpassword";
+          } else {
+            forgotPasswordLink.href = "#";
+          }
+}
+
+    
+        roleSelect.addEventListener("change", handleRoleChange);
+        handleRoleChange(); // Initial call on page load
+      });
+    
+      // Intercept form submit
+      document.getElementById("loginForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+    
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const role = document.getElementById("role").value;
+        const student_id = document.getElementById("student_id").value;
+    
+        const payload = role === "student"
+          ? { email, password, role, student_id }
+          : { email, password, role };
+    
+        fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.token) {
+              localStorage.setItem("auth_token", data.token);
+              window.location.href = data.redirectUrl;
+            } else {
+              alert("Login failed: " + data.error);
+            }
+          })
+          .catch(err => {
+            console.error("Error:", err);
+            alert("An error occurred during login.");
+          });
+      });
+    
+      // Intercept all fetch responses globally
+      const originalFetch = window.fetch;
+      window.fetch = function (...args) {
+        return originalFetch(...args)
+          .then(response => {
+            if (response.status === 401 || response.status === 403) {
+              return response.json().then(data => {
+                alert(data.message);
+                window.location.href = "/login";
+              });
+            }
+            return response;
+          })
+          .catch(error => console.error("❌ API error:", error));
+      };
+    </script>    
+  </body>
+</html>

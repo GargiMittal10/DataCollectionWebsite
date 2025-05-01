@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <title>Student Dashboard</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+    <style>
+      body {
+        background-color: #020230;
+        color: white;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      .container-box {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 30px;
+        color: #020230;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      h2 {
+        color: #020230;
+        font-weight: 700;
+        margin-bottom: 25px;
+      }
+
+      .control-panel {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .control-panel > div {
+        margin: 10px 0;
+      }
+
+      .control-panel label {
+        margin-right: 10px;
+        font-weight: 500;
+      }
+
+      .pagination-buttons {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .pagination-button {
+        background-color: #020230;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        margin: 0 5px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .pagination-button:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+      }
+
+      .navbar-nav .nav-item {
+        margin-right: 20px;
+      }
+
+      .navbar-nav .nav-link {
+        color: white !important;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="hero_area">
+      <!-- NAVBAR -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <span>
+              <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+            </span>
+            <a class="navbar-brand" href="/"> </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""> </span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/studentdash">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/table">View Results</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/dashboard">Visualise Results</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link"href="/chatbot">My Chatbot</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <section class="slider_section">
+        <div class="container container-box">
+          <h2>Student Skill Performance Data</h2>
+
+          <div class="control-panel row">
+            <div class="entries-control col-md-4">
+              <label for="entries">Show</label>
+              <select id="entries">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>entries</span>
+            </div>
+
+            <div class="search-control col-md-4">
+              <label for="searchBox">Search:</label>
+              <input type="search" id="searchBox" placeholder="Try entering a skill name">
+            </div>
+
+            <div class="day-select col-md-4">
+              <label for="sessionSelect">Select Session:</label>
+              <select id="sessionSelect">
+                <option value="all">All Sessions</option>
+                <option value="Session 1">Session 1</option>
+                <option value="Session 2">Session 2</option>
+                <option value="Session 3">Session 3</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table id="performanceTable" class="display table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>Session</th>
+                  <th>Skill</th>
+                  <th>Total Time Taken</th>
+                  <th>Conducted Time</th>
+                  <th>Conducted Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% rows.forEach(row => { %>
+                  <tr>
+                    <td><%= `Session ${row.session_no}` %></td>
+                    <td><%= row.skill_name %></td>
+                    <td><%= row.totaltime %></td>
+                    <td><%= row.conducted_time %></td>
+                    <td><%= row.conducted_date %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination-buttons">
+            <button class="pagination-button" id="prevButton">Previous</button>
+            <button class="pagination-button" id="nextButton">Next</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer_section">
+      <div class="container">
+        <p>&copy; <span id="displayYear"></span> All Rights Reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+    <script>
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            window.location.href = "/logout";
+        }
+      }
+
+      $(document).ready(function () {
+        const table = $('#performanceTable').DataTable({
+          paging: true,
+          searching: true,
+          ordering: true,
+          pageLength: 10,
+          lengthChange: false,
+          info: true,
+          language: {
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            infoFiltered: "(filtered from _MAX_ total entries)"
+          },
+          dom: 't<"bottom"i>',
+        });
+
+        $('#searchBox').on('keyup', function () {
+          table.search(this.value).draw();
+        });
+
+        $('#entries').on('change', function () {
+          table.page.len($(this).val()).draw();
+        });
+
+        $('#sessionSelect').on('change', function () {
+          const session = $(this).val();
+          table.column(0).search(session === 'all' ? '' : session).draw();
+        });
+
+        $('#nextButton').on('click', function () {
+          table.page('next').draw(false);
+        });
+
+        $('#prevButton').on('click', function () {
+          table.page('previous').draw(false);
+        });
+
+        table.on('draw', function () {
+          const info = table.page.info();
+          $('#prevButton').prop('disabled', info.page === 0);
+          $('#nextButton').prop('disabled', info.page === info.pages - 1);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Evaluation Form</title>
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #020230;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        color: black !important;
+        max-width: 800px;
+        margin: 30px auto;
+        text-align: left;
+      }
+      h1, h3 {
+        color: black;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 3px;
+        color: black;
+        font-size: 14px;
+      }
+      select, input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        color: black;
+        font-size: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: left;
+        color: #ffffff;
+        font-size: 14px;
+      }
+      th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
+      .action-button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        margin-right: 3px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+      }
+      .edit-btn {
+        background-color: #2196f3;
+      }
+      .delete-btn {
+        background-color: #f44336;
+      }
+      .add-question-btn {
+        background-color: #4caf50;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      
+      .submit-button {
+        background-color: #ff4646;
+        text-align: centre;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        font-size: 14px;
+        display: block; /* Make it a block element */
+       margin-left: auto; /* Push it to the center */
+       margin-right: auto; /* Push it to the center */
+      }
+      .hero_area {
+        flex-grow: 1;
+      }
+      .navbar-nav .nav-link {
+        color: white !important;
+      }
+      .dropdown-menu .dropdown-item {
+        color: black !important;
+      }
+      .dropdown-menu .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: black !important;
+      }
+      .button-container {
+        display: flex;
+        gap: 5px;
+      }
+      .edit-btn:hover {
+        background-color: #1976d2;
+      }
+      .delete-btn:hover {
+        background-color: #d32f2f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span>
+                <img src="/images/symbilogo.jpg" alt="Symbiosis Logo" style="width: 50px; height: auto" />
+              </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="addDropdown" role="button" data-toggle="dropdown">
+                    Add Data
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/addstudent" id="addStudentLink">Add Students</a>
+                    <a class="dropdown-item" href="/addfaculty">Add Faculty</a>
+                  </div>
+                </li>
+                <li id="mappingBtn" class="nav-item"><a class="nav-link" href="/mapping">Mapping</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="viewsDropdown" role="button" data-toggle="dropdown">
+                    Views
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/viewstudent">View Students</a>
+                    <a class="dropdown-item" href="/viewfacultycoord">View Faculty</a>
+                    <a class="dropdown-item" href="/viewmapping">View Mapping</a>
+                  </div>
+                </li>
+                <li id="downloadBtn" class="nav-item"><a class="nav-link" href="/download-excel">Download Format</a></li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <div class="container">
+        <header class="header">
+          <h2 id="title" style="text-align: center;">
+                       Student Evaluation Form
+                    </h2>
+        </header>
+        <form id="evaluation-form">
+          <div class="form-group">
+            <label for="skill">Select Skill</label>
+            <select name="skill" id="skill" class="form-control" required>
+              <option value="" disabled selected>Loading skills...</option>
+            </select>
+          </div>
+          <h3 id="skill-title"></h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Q.no</th>
+                <th>Task</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="task-list"></tbody>
+          </table>
+          <button type="button" class="action-button add-question-btn" id="add-question-btn">
+            Add Question
+          </button>
+          <div class="form-group">
+            <p id="timer-display"></p>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="submit-button">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const skillSelect = document.getElementById("skill");
+        const taskList = document.getElementById("task-list");
+        const addQuestionBtn = document.getElementById("add-question-btn");
+
+        // 1. Fetch all skills and populate the dropdown
+        try {
+          const skillResponse = await fetch("/api/skills");
+          if (!skillResponse.ok) throw new Error("Failed to fetch skills");
+          const skills = await skillResponse.json();
+
+          // Clear and populate skill dropdown
+          skillSelect.innerHTML = '<option value="" disabled selected>Select a skill</option>';
+          for (const skill of skills) {
+            const opt = document.createElement("option");
+            opt.value = skill.skill_id;
+            opt.textContent = skill.skill_name;
+            skillSelect.appendChild(opt);
+          }
+        } catch (error) {
+          console.error(error);
+          alert("Error loading skills. Please try again.");
+        }
+
+        // 2. On skill change, fetch questions for that skill
+        skillSelect.addEventListener("change", async () => {
+          await loadQuestionsForSkill(skillSelect.value);
+        });
+
+        // Helper: Load questions for a given skill
+        async function loadQuestionsForSkill(skillId) {
+          if (!skillId) return;
+          try {
+            const questionsResponse = await fetch(`/api/evaluation-questions?skill_id=${skillId}`);
+            if (!questionsResponse.ok) throw new Error("Failed to fetch questions");
+            const questions = await questionsResponse.json();
+
+            // Clear previous questions
+            taskList.innerHTML = "";
+
+            // Populate table with new questions
+            questions.forEach((q) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${q.Qno}</td>
+                <td>${q.Question}</td>
+                <td>
+  <div class="button-container">
+    <button type="button" class="action-button edit-btn" data-qno="${q.Qno}" data-question="${q.Question}">
+      Edit
+    </button>
+    <button type="button" class="action-button delete-btn" data-qno="${q.Qno}">
+      Delete
+    </button>
+  </div>
+</td>
+              `;
+              taskList.appendChild(row);
+            });
+
+            // Attach event listeners for Edit/Delete
+            attachEditDeleteHandlers();
+          } catch (error) {
+            console.error(error);
+            alert("Error loading questions. Please try again.");
+          }
+        }
+
+        // 3. Add Question
+        // 3. Add Question
+addQuestionBtn.addEventListener("click", async () => {
+  const skillId = skillSelect.value;
+  if (!skillId) {
+    alert("Please select a skill first!");
+    return;
+  }
+  
+  // Get Question Number
+  const questionNumber = prompt("Enter Question Number:");
+  if (!questionNumber) return; // Ensure Qno is provided
+
+  // Get Question Text
+  const questionText = prompt("Enter the new question:");
+  if (!questionText) return; // Ensure question is provided
+
+  // Send to backend (POST)
+  try {
+    const response = await fetch("/api/evaluation-questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        skill_id: skillId,
+        qno: questionNumber, // Fix: Ensure Qno is included
+        question: questionText
+      })
+    });
+    if (!response.ok) throw new Error("Failed to add question");
+    await loadQuestionsForSkill(skillId);
+  } catch (err) {
+    console.error(err);
+    alert("Error adding question. Please try again.");
+  }
+});
+
+
+        // 4. Edit & Delete Handlers
+        function attachEditDeleteHandlers() {
+          // Edit
+          // Edit Question
+document.querySelectorAll(".edit-btn").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const qno = btn.getAttribute("data-qno"); // Old question number
+    const oldQuestion = btn.getAttribute("data-question");
+
+    // Ask for new Qno and Question
+    const newQno = prompt("Enter new question number:", qno);
+    if (!newQno) return; // Ensure a new Qno is provided
+
+    const newQuestion = prompt("Edit Question:", oldQuestion);
+    if (!newQuestion || newQuestion === oldQuestion) return; // Ensure a new question is provided
+
+    try {
+      const response = await fetch(`/api/evaluation-questions/${qno}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newQno, question: newQuestion }) // Fix: Include newQno
+      });
+
+      if (!response.ok) throw new Error("Failed to edit question");
+      
+      // Reload questions to reflect the changes
+      await loadQuestionsForSkill(skillSelect.value);
+    } catch (err) {
+      console.error(err);
+      alert("Error editing question. Please try again.");
+    }
+  });
+});
+
+          // Delete
+          document.querySelectorAll(".delete-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const qno = btn.getAttribute("data-qno");
+              if (!confirm("Are you sure you want to delete this question?")) return;
+
+              try {
+                const response = await fetch(`/api/evaluation-questions/${qno}`, {
+                  method: "DELETE"
+                });
+                if (!response.ok) throw new Error("Failed to delete question");
+                // Reload questions
+                await loadQuestionsForSkill(skillSelect.value);
+              } catch (err) {
+                console.error(err);
+                alert("Error deleting question. Please try again.");
+              }
+            });
+          });
+        }
+
+        // 5. Handle form submission (optional)
+        const form = document.getElementById("evaluation-form");
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          alert("Form submitted!");
+        });
+      });
+
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+        }
+      }
+
+    </script>
+    <!-- Required JS for Bootstrap Dropdowns -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  </body>
+</html>

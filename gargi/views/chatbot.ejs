@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Chatbot</title>
+
+  <!-- Bootstrap & Fonts -->
+  <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet" />
+  <link href="/css/responsive.css" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #020230;
+      color: white;
+    }
+
+    .logged-in-info {
+      background: rgba(200, 200, 200, 0.3);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: 15px;
+      color: white;
+    }
+
+    .navbar-nav .nav-item {
+      margin-right: 20px;
+    }
+
+    .navbar-nav .nav-link {
+      color: white !important;
+      font-weight: 500;
+    }
+
+    #chat-container {
+      width: 450px;
+      margin: 120px auto 50px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: white;
+      color: black;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #020230;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 90%;
+      line-height: 1.4;
+    }
+
+    .user {
+      background-color: #d0ebff;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .bot {
+      background-color: #f1f3f5;
+      text-align: left;
+      margin-right: auto;
+    }
+
+    #typing-indicator {
+      color: #888;
+      font-style: italic;
+      display: none;
+      padding: 5px;
+    }
+
+    form {
+      display: flex;
+      margin-top: 15px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-left: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="header_section">
+    <div class="container-fluid">
+      <nav class="navbar navbar-expand-lg custom_nav-container">
+        <span>
+          <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+        </span>
+        <a class="navbar-brand" href="/"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+          <span class=""> </span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/studentdash">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/table">View Results</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">Visualise Results</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"href="/chatbot">My Chatbot</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Chat Container -->
+  <div id="chat-container">
+    <h2>Student Chatbot</h2>
+    <div id="messages"></div>
+    <div id="typing-indicator">Bot is typing...</div>
+    <form id="chat-form">
+      <input type="text" id="userInput" placeholder="Ask something..." required>
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer_section">
+    <div class="container">
+      <p>&copy; <span id="displayYear"></span> All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/jquery-3.4.1.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+  <script src="/js/custom.js"></script>
+  <script>
+    function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout";
+      }
+    }
+  
+    let studentId = null;
+  
+    document.addEventListener("DOMContentLoaded", async function () {
+      const token = localStorage.getItem("auth_token");
+  
+      if (!token) {
+        console.error("❌ No token found in localStorage");
+        return;
+      }
+  
+      try {
+        const response = await fetch("http://localhost:3000/getStudentName", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,   // <-- Corrected
+          },
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          console.log("✅ Student Name:", data.studentName);
+          studentId = data.studentName;
+        } else {
+          console.error("Failed to fetch student name:", data.error);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching student name:", error);
+      }
+    });
+  
+    const form = document.getElementById('chat-form');
+    const messages = document.getElementById('messages');
+    const userInput = document.getElementById('userInput');
+    const sendButton = document.getElementById('send-button');
+    const typingIndicator = document.getElementById('typing-indicator');
+  
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = userInput.value.trim();
+  
+      if (!message) return;
+  
+      addMessage('user', message);
+      userInput.value = '';
+      sendButton.disabled = true;
+      typingIndicator.style.display = 'block';
+  
+      try {
+        const lowerMsg = message.toLowerCase();
+        const performanceKeywords = ['performance', 'skill', 'skills', 'how did i do', 'report', 'recommendation', 'improve'];
+        const isPerformanceQuery = performanceKeywords.some(keyword => lowerMsg.includes(keyword));
+  
+        let response, data;
+  
+        if (isPerformanceQuery) {
+          if (!studentId) throw new Error("Student ID not available.");
+  
+          response = await fetch('/evaluateResults', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId })
+          });
+  
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          data = await response.json();
+  
+          let reply = data.message;
+          if (data.detailedReport?.length) {
+            data.detailedReport.forEach(report => {
+              reply += `\n\n📊 *${report.skill}*:\n- Total Attempts: ${report.totalAttempts}\n- Success Rate: ${report.successRate}\n- Failure Rate: ${report.failureRate}\n`;
+            });
+          }
+  
+          if (data.recommendations?.length) {
+            reply += `\n\n🌟 *Recommendations*:\n`;
+            data.recommendations.forEach(rec => {
+              reply += `- ${rec.message}\n`;
+            });
+          }
+  
+          addMessage('bot', reply);
+        } else {
+          response = await fetch('/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+          });
+  
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          data = await response.json();
+          addMessage('bot', data.reply);
+        }
+      } catch (error) {
+        console.error('Chatbot error:', error);
+        addMessage('bot', `❌ Error: ${error.message}`);
+      } finally {
+        sendButton.disabled = false;
+        typingIndicator.style.display = 'none';
+        userInput.focus();
+      }
+    });
+  
+    function addMessage(sender, text) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}`;  // <-- Corrected using backticks
+      messageDiv.textContent = text;
+      messages.appendChild(messageDiv);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+  
+</body>
+</html>
