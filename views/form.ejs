@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Evaluation Form</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:200i,400&display=swap"
+    />
+    <link rel="stylesheet" href="/css/form.css" />
+    <style>
+      .start-button {
+        background-color: #4caf50;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+      .stop-button {
+        background-color: #f44336;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+      .back-button {
+        background-color: #333;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 10px 2px;
+      }
+      .view-results-button {
+        background-color: #333;
+        border: none;
+        color: #fff;
+        padding: 10px 30px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        margin: 10px 460px;
+      }
+      .navigation-buttons-container {
+        display: flex;
+        justify-content: flex-start;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .manual-time {
+        display: block;
+      }
+      .manual-time .form-control {
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 id="title">Student Evaluation Form</h1>
+      </header>
+
+      <div class="navigation-buttons-container">
+        <button type="button" class="back-button" onclick="location.href='/viewforms'">
+          Back
+        </button>
+        <button type="button" class="view-results-button" onclick="location.href='/studentdata'">
+          View Results
+        </button>
+      </div>
+
+      <form id="evaluation-form">
+        <div class="form-group">
+          <label for="skill">Select Skill</label>
+          <select name="skill" id="skill" class="form-control" required>
+            <option value="" disabled selected>Loading skills...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="prn">Select Student (PRN)</label>
+          <select name="prn" id="prn" class="form-control" required>
+            <option value="" disabled selected>Select skill first</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input type="date" id="date" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+          <label for="session-no">Session Number</label>
+          <input type="number" id="session-no" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+          <label for="conducted_time">Conducted Time</label>
+          <input type="time" id="conducted_time" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+          <label for="time-mode">Total Time Mode</label>
+          <select id="time-mode" class="form-control">
+            <option value="manual" selected>Manual</option>
+            <option value="automatic">Automatic</option>
+          </select>
+        </div>
+
+        <div class="form-group automatic-timer-start" style="display: none;">
+          <button type="button" id="start-timer" class="start-button">Start Timer</button>
+        </div>
+
+        <h3 id="skill-title">Evaluation</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Q.no</th><th>Task</th><th>Completed</th><th>Not Completed</th>
+            </tr>
+          </thead>
+          <tbody id="task-list"></tbody>
+        </table>
+
+        <div class="form-group automatic-timer-stop" style="display: none;">
+          <button type="button" id="stop-timer" class="stop-button">Stop Timer</button>
+        </div>
+
+        <div class="form-group">
+          <p id="timer-display"></p>
+        </div>
+
+        <div class="form-group manual-time">
+          <label>Total Time Taken</label>
+          <div class="d-flex">
+            <select id="hours" class="form-control mr-1">
+              <option value="" disabled selected>HH</option>
+            </select>
+            <select id="minutes" class="form-control mr-1">
+              <option value="" disabled selected>MM</option>
+            </select>
+            <select id="seconds" class="form-control">
+              <option value="" disabled selected>SS</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="submit-button">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          alert("Unauthorized! Please log in.");
+          location.href = "/login";
+          return;
+        }
+
+        const form = document.getElementById("evaluation-form");
+        const skillSelect = document.getElementById("skill");
+        const prnSelect = document.getElementById("prn");
+        const dateInput = document.getElementById("date");
+        const sessionNoInput = document.getElementById("session-no");
+        const conductedTimeInput = document.getElementById("conducted_time");
+        const timeModeSelect = document.getElementById("time-mode");
+        const startTimerBtn = document.getElementById("start-timer");
+        const stopTimerBtn = document.getElementById("stop-timer");
+        const timerDisplay = document.getElementById("timer-display");
+        const autoStart = document.querySelector(".automatic-timer-start");
+        const autoStop = document.querySelector(".automatic-timer-stop");
+        const hoursSelect = document.getElementById("hours");
+        const minutesSelect = document.getElementById("minutes");
+        const secondsSelect = document.getElementById("seconds");
+        const taskList = document.getElementById("task-list");
+
+        // Populate HH:MM:SS
+        for (let h = 0; h < 24; h++) {
+          const hh = String(h).padStart(2, "0");
+          let opt = new Option(hh, hh);
+          hoursSelect.add(opt);
+        }
+        for (let i = 0; i < 60; i++) {
+          const mm = String(i).padStart(2, "0");
+          [minutesSelect, secondsSelect].forEach(sel => {
+            let opt = new Option(mm, mm);
+            sel.add(opt);
+          });
+        }
+
+        // Date setup
+        const today = new Date().toISOString().split("T")[0];
+        dateInput.value = dateInput.min = dateInput.max = today;
+
+        // Mode toggle
+        timeModeSelect.addEventListener("change", () => {
+          if (timeModeSelect.value === "manual") {
+            document.querySelector(".manual-time").style.display = "block";
+            autoStart.style.display = autoStop.style.display = "none";
+          } else {
+            document.querySelector(".manual-time").style.display = "none";
+            autoStart.style.display = "block";
+            autoStop.style.display = "none";
+            hoursSelect.selectedIndex = minutesSelect.selectedIndex = secondsSelect.selectedIndex = 0;
+          }
+        });
+
+        // Timer logic
+        let startTime, interval;
+        startTimerBtn.addEventListener("click", () => {
+          if (interval) clearInterval(interval);
+          startTime = Date.now();
+          interval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const m = Math.floor(elapsed / 60000);
+            const s = Math.floor((elapsed % 60000) / 1000);
+            timerDisplay.textContent = `Timer: ${m}m ${s}s`;
+          }, 1000);
+          autoStart.style.display = "block";
+          autoStop.style.display = "block";
+        });
+        stopTimerBtn.addEventListener("click", () => {
+          clearInterval(interval);
+          const elapsed = Date.now() - startTime;
+          const h = Math.floor(elapsed / 3600000);
+          const m = Math.floor((elapsed % 3600000) / 60000);
+          const s = Math.floor((elapsed % 60000) / 1000);
+          hoursSelect.value = String(h).padStart(2, "0");
+          minutesSelect.value = String(m).padStart(2, "0");
+          secondsSelect.value = String(s).padStart(2, "0");
+          timerDisplay.textContent = `Final Time: ${h}h ${m}m ${s}s`;
+          autoStart.style.display = "block";
+          autoStop.style.display = "none";
+        });
+
+        // Fetch skills/students/questions
+        async function fetchSkills() {
+          try {
+            let res = await fetch("/getFacultySkills", {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            let skills = await res.json();
+            skillSelect.innerHTML = '<option disabled selected>Select Skill</option>';
+            skills.forEach(s => skillSelect.add(new Option(s.skill_name, s.skill_id)));
+          } catch {
+            skillSelect.innerHTML = '<option disabled>Error loading</option>';
+          }
+        }
+
+        async function fetchStudents(skillId) {
+          prnSelect.innerHTML = '<option disabled selected>Loading...</option>';
+          try {
+            let res = await fetch(`/getStudentsBySkill/${skillId}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            let list = await res.json();
+            prnSelect.innerHTML = '<option disabled selected>Select Student</option>';
+            list.forEach(st =>
+              prnSelect.add(new Option(`${st.student_id} - ${st.student_name}`, st.student_id))
+            );
+          } catch {
+            prnSelect.innerHTML = '<option disabled>Error</option>';
+          }
+        }
+
+        async function fetchQuestions(skillId) {
+          taskList.innerHTML = "";
+          try {
+            let res = await fetch(`/fetch-questions/${skillId}`);
+            let qs = await res.json();
+            if (!qs.length) {
+              taskList.innerHTML = "<tr><td colspan='4'>No questions.</td></tr>";
+            } else {
+              qs.forEach(t =>
+                taskList.insertAdjacentHTML("beforeend",
+                  `<tr>
+                    <td>${t.Qno}</td>
+                    <td>${t.Question}</td>
+                    <td><input type="radio" name="task${t.Qno}" value="Completed" required checked></td>
+                    <td><input type="radio" name="task${t.Qno}" value="Not Completed"></td>
+                  </tr>`
+                )
+              );
+            }
+          } catch {}
+        }
+
+        skillSelect.addEventListener("change", async () => {
+          let id = skillSelect.value;
+          if (!id) return;
+          await fetchStudents(id);
+          await fetchQuestions(id);
+        });
+
+        // Submit
+        form.addEventListener("submit", async e => {
+          e.preventDefault();
+          const sk = skillSelect.value;
+          const pr = prnSelect.value;
+          const dt = dateInput.value;
+          const ct = conductedTimeInput.value;
+          const sn = +sessionNoInput.value;
+          if (!sk || !pr || !sn) {
+            return alert("Please complete all required fields.");
+          }
+          const totalTime = `${hoursSelect.value || "00"}:${minutesSelect.value || "00"}:${secondsSelect.value || "00"}`;
+          let results = [];
+          taskList.querySelectorAll("tr").forEach(row => {
+            let q = +row.cells[0].innerText;
+            let sel = row.querySelector(`input[name="task${q}"]:checked`);
+            if (sel) {
+              results.push({
+                student_id: pr,
+                skill_id: sk,
+                Qno: q,
+                Result: sel.value,
+                totaltime: totalTime,
+                conducted_time: ct,
+                conducted_date: dt,
+                session_no: sn
+              });
+            }
+          });
+          if (!results.length) return alert("Answer at least one question.");
+          try {
+            let res = await fetch("/submit-results", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({ results })
+            });
+            let data = await res.json();
+            if (res.ok) {
+              alert("Results submitted successfully!");
+              form.reset();
+              dateInput.value = today;
+              timerDisplay.textContent = "";
+            } else {
+              alert("Error: " + data.error);
+            }
+          } catch {
+            alert("Submission failed.");
+          }
+        });
+
+        await fetchSkills();
+      });
+    </script>
+  </body>
+</html>

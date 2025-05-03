@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Site Metas -->
+        <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+        <meta name="keywords" content="" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+    
+        <title>Student Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background-color: #020230;
+            color: #020230;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            color: black;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #020230;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .logged-in-info {
+            background: rgba(200, 200, 200, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 15px;
+            color: white;
+        }
+        /* Navbar styling */
+      .navbar-nav .nav-item {
+        margin-right: 20px;
+      }
+      .navbar-nav .nav-link {
+        color: white !important;
+        font-weight: 500;
+      }
+    </style>
+</head>
+<body>
+    <% if (!user || user.role !== "admin") { %>
+        <script>
+            alert("❌ Access Denied: Please log in as Admin.");
+            window.location.href = "/login";
+        </script>
+    <% } %>
+
+    <nav class="navbar navbar-expand-lg custom_nav-container">
+        <span>
+          <img
+            src="/images/symbilogo.jpg"
+            alt="Logo"
+            class="logo"
+            style="width: 50px; height: auto"
+          />
+        </span>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="/"> </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class=""> </span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/admindash">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/viewfacultyadmin">Faculty List</a>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="/viewresult">Result Details</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+          </li>
+          </ul>
+        </div>
+      </nav>
+
+    <div class="container mt-4">
+        <h2>Student Management System</h2>
+        <p>Manage student data efficiently. Search records.</p>
+
+        <label for="studentSearch"><strong>Search Student:</strong></label>
+        <input type="text" id="studentSearch" class="form-control mb-3" placeholder="Search by name, ID, or email...">
+
+        <div class="table-container">
+            <table class="table table-bordered table-striped text-center">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Year</th>
+                        <th>Institute</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <% students.forEach(student => { %>  
+                        <tr>
+                            <td><%= student.student_id %></td>
+                            <td><%= student.student_name %></td>
+                            <td><%= student.email %></td>
+                            <td><%= student.year %></td>
+                            <td><%= student.institute %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>        
+            </table>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          // Student Search Functionality
+          const studentSearch = document.getElementById('studentSearch');
+          if (studentSearch) {
+              studentSearch.addEventListener('input', function () {
+                  let searchValue = this.value.toLowerCase();
+                  let rows = document.querySelectorAll("#studentTableBody tr");
+
+                  rows.forEach(row => {
+                      let studentID = row.cells[0]?.textContent.toLowerCase() || "";
+                      let studentName = row.cells[1]?.textContent.toLowerCase() || "";
+                      let email = row.cells[2]?.textContent.toLowerCase() || "";
+
+                      row.style.display = (studentID.includes(searchValue) || studentName.includes(searchValue) || email.includes(searchValue)) ? "" : "none";
+                  });
+              });
+          }
+      });
+    </script>
+    <script>
+      function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+      }
+  }
+  </script>
+</body>
+</html>

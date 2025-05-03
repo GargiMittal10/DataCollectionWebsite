@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-bundle.min.js"></script>
+</head>
+<body>
+  <h1><%= chartHeading %></h1>
+
+  <div id="container" style="width: 100%; height: 400px;"></div>
+
+  <script>
+    function getBoxStats(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const median = (arr) => {
+    const mid = Math.floor(arr.length / 2);
+    return arr.length % 2 === 0
+      ? (arr[mid - 1] + arr[mid]) / 2
+      : arr[mid];
+  };
+
+  const q1 = median(sorted.slice(0, Math.floor(sorted.length / 2)));
+  const q3 = median(sorted.slice(Math.ceil(sorted.length / 2)));
+
+  return {
+    low: sorted[0],
+    q1,
+    median: median(sorted),
+    q3,
+    high: sorted[sorted.length - 1],
+  };
+}
+const chartData = <%- JSON.stringify(chartData) %>;
+
+const boxplotData = chartData.map(skill => {
+  const stats = getBoxStats(skill.times);
+  return {
+    x: "Skill " + skill.skillId,
+    ...stats
+  };
+});
+
+console.log("📦 Boxplot Data with Stats:", boxplotData);
+
+anychart.onDocumentReady(function () {
+  const chart = anychart.box();
+  chart.data(boxplotData);
+  chart.title("Time Distribution Across Skills");
+  chart.yAxis().title("Time Taken (seconds)");
+  chart.xAxis().title("Skills Name");
+  chart.container('container');
+  chart.draw();
+});
+  </script>
+  
+  
+</body>
+
+</html>

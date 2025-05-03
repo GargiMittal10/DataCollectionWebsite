@@ -1,0 +1,38 @@
+{
+    "IM Injection": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=Y3dK3Gz1l3Y" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=Ywzj2N-3e6M" },
+      { "type": "Book", "resource": "Fundamentals of Nursing, 9th Edition" },
+      { "type": "Book", "resource": "Clinical Nursing Skills and Techniques by Perry & Potter" }
+    ],
+    "IV Insertion": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=bFDZgLZC0zI" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=Yc7GgKDzTyQ" },
+      { "type": "Book", "resource": "Intravenous Therapy in Nursing Practice" },
+      { "type": "Book", "resource": "Clinical Nursing Skills by Smith & Duell" }
+    ],
+    "Nasogastric (NG) Tube Insertion Procedure": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=CRXx52Ck_vg" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=1RGvUfvD1dI" },
+      { "type": "Book", "resource": "Clinical Procedures for Safer Patient Care" },
+      { "type": "Book", "resource": "Manual of Nursing Procedures and Practice" }
+    ],
+    "Adult CPR and AED Skills": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=2FPivlfvxu0" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=cosVBV96E2g" },
+      { "type": "Book", "resource": "Basic Life Support (BLS) Provider Manual" },
+      { "type": "Book", "resource": "Emergency Cardiovascular Care (ECC) Handbook" }
+    ],
+    "Airway Management Skills Testing Checklist": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=MgXzSmS4wHQ" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=ljCTIOKWSJ4" },
+      { "type": "Book", "resource": "Airway Management in Emergencies, 2nd Edition" },
+      { "type": "Book", "resource": "Manual of Emergency Airway Management" }
+    ],
+    "Components of Post–Cardiac Arrest Care": [
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=wN4r2YO9DD0" },
+      { "type": "Video", "resource": "https://www.youtube.com/watch?v=PRvMu1AERwI" },
+      { "type": "Book", "resource": "Advanced Cardiovascular Life Support (ACLS) Provider Manual" },
+      { "type": "Book", "resource": "Post-Resuscitation and Neurological Care Handbook" }
+    ]
+  }

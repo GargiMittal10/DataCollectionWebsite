@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Visual Analysis for Faculty</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.css" />
+    
+    <!-- Fonts style -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome style -->
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+
+    <!-- Custom styles -->
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/Faculty-Dashboard Html/css/responsive.css" rel="stylesheet" />
+
+    <!-- Chart libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-bundle.min.js"></script>
+
+    <style>
+      body {
+        background-color: #020230;
+        color: #f8f9fa;
+        font-family: 'Roboto', sans-serif;
+      }
+      
+      .hero_area {
+        padding: 20px;
+      }
+      
+      .chart-container {
+        background-color: rgba(255, 255, 255, 0.03);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        margin-top: 10px;
+        height: 370px;
+        width: 100%;
+        position: relative;
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      
+      .chart-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      
+      .kpi-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        height: 100%;
+        transition: all 0.3s ease;
+      }
+      
+      .kpi-card:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      .kpi-value {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #17a2b8;
+      }
+      
+      .kpi-title {
+        font-size: 14px;
+        color: #adb5bd;
+        margin-bottom: 0;
+      }
+      
+      .chart-title {
+        text-align: center;
+        color: white;
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: 500;
+        padding-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .dropdown-wrapper {
+        position: relative;
+        margin-left: 15px;
+      }
+      
+      .skill-dropdown {
+        background-color: #17a2b8;
+        color: white;
+        padding: 5px 30px 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+      
+      .dropdown-wrapper::after {
+        content: '▼';
+        font-size: 10px;
+        color: white;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+      
+      .skill-dropdown:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.5);
+      }
+      
+      .chart-info {
+        position: absolute;
+        top: 0;
+        right: 20px;
+        font-size: 12px;
+        color: #adb5bd;
+      }
+      
+      .row {
+        margin-top: 30px;
+      }
+      
+      .col-md-6, .col-md-3 {
+        margin-bottom: 30px;
+      }
+      
+      #container, #timeProgressionChart {
+        width: 100%;
+        height: 300px;
+      }
+      
+      canvas {
+        max-width: 100%;
+      }
+      
+      .navbar {
+        background-color:#020230;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      
+      .nav-link {
+        color: #f8f9fa !important;
+        font-weight: 500;
+        padding: 10px 15px !important;
+        transition: all 0.3s ease;
+      }
+
+      
+      .dropdown-menu {
+        background-color: #343a40;
+        border: none;
+      }
+      
+      .dropdown-item {
+        color: #f8f9fa;
+      }
+      
+      .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      .active .nav-link {
+        border-bottom: 2px solid #17a2b8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="hero_area">
+      <!-- Header -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span><img src="/images/symbilogo.jpg" alt="Logo" style="width: 50px; height: auto" /></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item "><a class="nav-link" href="/faculty-dashboard">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/viewforms">Take Evaluation</a></li>
+                <li class="nav-item"><a class="nav-link" href="/faculty/dashboard">Visualize Performance</a></li>
+                <li class="nav-item"><a class="nav-link" href="/studentdata">Student Data</a></li>
+                <li class="nav-item"><a class="nav-link" href="/facfeedback">Give Feedback</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="facultyDropdown" role="button" data-toggle="dropdown">
+                    <span id="facultyName"><%= facultyName %></span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/logout" onclick="confirmLogout()">Logout</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <div class="container">
+          <h2 style="text-align:center; color:white;">Visual Analysis for Faculty</h2>
+          <h4 style="text-align:center; color:white;"><%= facultyName %> - Performance Dashboard</h4>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <p class="kpi-title">Total Students</p>
+              <h3 class="kpi-value"><%= totalStudents %></h3>
+              <small>Students evaluated</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <p class="kpi-title">Skills Covered</p>
+              <h3 class="kpi-value"><%= totalSkills %></h3>
+              <small>Unique skills</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <p class="kpi-title">Avg. Completion Rate</p>
+              <h3 class="kpi-value"><%= avgCompletionRate %>%</h3>
+              <small>Overall performance</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kpi-card">
+              <p class="kpi-title">Avg. Time Taken</p>
+              <h3 class="kpi-value"><%= avgTimeTaken %> min</h3>
+              <small>Per skill</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="chart-title">
+              <h5>Student Time Spent</h5>
+              <div class="dropdown-wrapper">
+                <select id="skillDropdown" class="skill-dropdown">
+                  <% allSkillsData.forEach((skill, index) => { %>
+                    <option value="<%= index %>"><%= skill.skillName %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="chart-container">
+              <div class="chart-info" id="timeSpentInfo">
+                <p id="studentCount" class="text-center mb-0" style="font-size: 12px; color: #adb5bd;"></p>
+              </div>
+              <canvas id="performanceChart1"></canvas>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="chart-title">
+              <h5>Performance Distribution</h5>
+              <div class="dropdown-wrapper">
+                <select id="performanceSkillDropdown" class="skill-dropdown">
+                  <% allSkillsData.forEach((skill, index) => { %>
+                    <option value="<%= index %>"><%= skill.skillName %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="performanceChart2"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="chart-title">
+              <h5>Time Distribution Across Skills</h5>
+            </div>
+            <div class="chart-container">
+              <div id="container"></div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="chart-title">
+              <h5>Time Progression Across Sessions</h5>
+            </div>
+            <div class="chart-container">
+              <div id="timeProgressionChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Scripts -->
+    <script>
+      // Store all skills data from server
+      const allSkillsData = <%- JSON.stringify(allSkillsData) %>;
+      let currentSkillIndex = 0;
+      let performanceChart1, performanceChart2;
+      
+      // Initialize the bar chart (Time Spent)
+      function initBarChart() {
+        const ctx1 = document.getElementById('performanceChart1').getContext('2d');
+        
+        if (performanceChart1) {
+          performanceChart1.destroy();
+        }
+        
+        const currentSkill = allSkillsData[currentSkillIndex];
+        
+        // Limit the number of students shown to prevent overcrowding
+        let studentNames = [...currentSkill.studentNames];
+        let studentScores = [...currentSkill.studentScores];
+        
+        // If there are more than 6 students, show only top 6 by score
+        if (studentNames.length > 6) {
+          // Create pairs of names and scores
+          let pairs = studentNames.map((name, i) => ({
+            name: name,
+            score: parseFloat(studentScores[i])
+          }));
+          
+          // Sort by score (descending)
+          pairs.sort((a, b) => b.score - a.score);
+          
+          // Take top 6
+          pairs = pairs.slice(0, 6);
+          
+          // Rebuild arrays
+          studentNames = pairs.map(p => p.name);
+          studentScores = pairs.map(p => p.score);
+        }
+        
+        // Update the student count info
+        document.getElementById('studentCount').textContent = 
+          `Showing ${studentNames.length} of ${currentSkill.studentNames.length} students`;
+        
+        performanceChart1 = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: studentNames,
+            datasets: [{
+              label: `Time Spent (${currentSkill.skillName})`,
+              data: studentScores,
+              backgroundColor: 'rgba(23, 162, 184, 0.6)',
+              borderColor: 'rgba(23, 162, 184, 1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',  // Horizontal bar chart for better readability with long names
+            scales: {
+              y: {
+                ticks: {
+                  color: 'white',
+                  font: {
+                    size: 11
+                  }
+                },
+                grid: {
+                  display: false
+                }
+              },
+              x: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Time (in minutes)',
+                  color: 'white',
+                  font: {
+                    size: 12
+                  }
+                },
+                ticks: {
+                  color: 'white'
+                },
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false  // Hide legend as it's redundant with the chart title
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderWidth: 1,
+                callbacks: {
+                  label: function(context) {
+                    return `Time: ${context.parsed.x} minutes`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Calculate performance distributions for a specific skill
+      function calculatePerformanceDistribution(scores) {
+        let excellent = 0, good = 0, average = 0, poor = 0;
+        
+        scores.forEach(score => {
+          const rate = parseFloat(score);
+          if (rate >= 76) excellent++;
+          else if (rate >= 51) good++;
+          else if (rate >= 26) average++;
+          else poor++;
+        });
+        
+        return { excellent, good, average, poor };
+      }
+      
+      // Initialize the pie chart (Performance Distribution)
+      function initPieChart() {
+        const ctx2 = document.getElementById('performanceChart2').getContext('2d');
+        
+        if (performanceChart2) {
+          performanceChart2.destroy();
+        }
+        
+        const currentSkill = allSkillsData[currentSkillIndex];
+        const performanceData = calculatePerformanceDistribution(currentSkill.studentScores);
+        
+        // Create data array and filter out zero values to avoid empty segments
+        const dataPoints = [
+        { label: 'Excellent (76-100%)', value: performanceData.excellent, color: '#00FF9C' },  // Bright mint green
+  { label: 'Good (51-75%)', value: performanceData.good, color: '#00CFFF' },             // Sky blue
+  { label: 'Average (26-50%)', value: performanceData.average, color: '#FFD700' },       // Bright gold
+  { label: 'Poor (0-25%)', value: performanceData.poor, color: '#FF4C4C' }   
+        ].filter(point => point.value > 0);
+        
+        performanceChart2 = new Chart(ctx2, {
+          type: 'doughnut', // Doughnut chart is cleaner than pie
+          data: {
+            labels: dataPoints.map(d => d.label),
+            datasets: [{
+              data: dataPoints.map(d => d.value),
+              backgroundColor: dataPoints.map(d => d.color),
+              borderColor: '#151a30',
+              borderWidth: 1,
+              hoverOffset: 15
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%', // Makes the doughnut hole
+            plugins: {
+              legend: {
+                position: 'right',
+                align: 'center',
+                labels: {
+                  color: 'white',
+                  padding: 15,
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  boxWidth: 10,
+                  font: {
+                    size: 11
+                  },
+                  generateLabels: function(chart) {
+                    const data = chart.data;
+                    if (data.labels.length && data.datasets.length) {
+                      return data.labels.map((label, i) => {
+                        const value = data.datasets[0].data[i];
+                        const backgroundColor = data.datasets[0].backgroundColor[i];
+                        
+                        return {
+                          text: `${label}: ${value}`,
+                          fillStyle: backgroundColor,
+                          strokeStyle: '#151a30',
+                          lineWidth: 1,
+                          hidden: false,
+                          index: i
+                        };
+                      });
+                    }
+                    return [];
+                  }
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                callbacks: {
+                  title: function(tooltipItems) {
+                    return currentSkill.skillName;
+                  },
+                  label: function(tooltipItem) {
+                    const percentage = Math.round(tooltipItem.parsed * 100 / 
+                      tooltipItem.dataset.data.reduce((a, b) => a + b, 0));
+                    return `${tooltipItem.label}: ${tooltipItem.raw} students (${percentage}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Boxplot - Time Distribution Across Skills
+      anychart.onDocumentReady(function() {
+        anychart.theme('darkEarth');
+        
+        const chartData = <%- JSON.stringify(chartData) %>;
+        
+        function getBoxStats(values) {
+          const sorted = [...values].sort((a, b) => a - b);
+          const median = arr => {
+            const mid = Math.floor(arr.length / 2);
+            return arr.length % 2 === 0 ? (arr[mid - 1] + arr[mid]) / 2 : arr[mid];
+          };
+
+          const q1 = median(sorted.slice(0, Math.floor(sorted.length / 2)));
+          const q3 = median(sorted.slice(Math.ceil(sorted.length / 2)));
+
+          return {
+            low: sorted[0],
+            q1,
+            median: median(sorted),
+            q3,
+            high: sorted[sorted.length - 1],
+          };
+        }
+
+        const boxplotData = chartData.map(skill => {
+          const stats = getBoxStats(skill.times);
+          return {
+            x: "Skill " + skill.skillId,
+            ...stats
+          };
+        });
+
+        const chart = anychart.box();
+        chart.data(boxplotData);
+        chart.title().enabled(false);
+        chart.yAxis().title("Time Taken (seconds)");
+        chart.xAxis().title("Skills");
+        
+        // Style configuration
+        chart.tooltip().titleFormat("{%x}");
+        chart.tooltip().format("Median: {%median}\nQ1: {%q1}\nQ3: {%q3}\nMin: {%low}\nMax: {%high}");
+        
+        chart.container('container');
+        chart.draw();
+      });
+
+      // Time Progression Line Chart
+      anychart.onDocumentReady(function() {
+        anychart.theme('darkEarth');
+        
+        const chartData = <%- JSON.stringify(chartData) %>;
+        
+        // Transform the data for line chart
+        const lineData = [];
+        const skillIds = chartData.map((item, index) => "Skill " + item.skillId);
+        
+        // Prepare data for the line chart
+        // For each skill, calculate average time
+        chartData.forEach((skill, index) => {
+          const avgTime = skill.times.reduce((a, b) => a + b, 0) / skill.times.length / 60; // Convert to minutes
+          lineData.push({
+            x: "Skill " + skill.skillId,
+            value: avgTime.toFixed(2)
+          });
+        });
+        
+        const chart = anychart.line();
+        chart.data(lineData);
+        chart.title().enabled(false);
+        chart.yAxis().title("Average Time (minutes)");
+        chart.xAxis().title("Skills");
+        
+        // Style the series
+        const series = chart.line(lineData);
+        series.name("Avg. Time");
+        series.stroke('3 #17a2b8');
+        series.markers().enabled(true).type('circle').size(6);
+        series.tooltip().format("Avg Time: {%value} mins");
+        
+        // Add a spline guide to show trend
+        const trendSeries = chart.spline(lineData);
+        trendSeries.name("Trend");
+        trendSeries.stroke('2 #dc3545 0.6');
+        
+        chart.legend().enabled(true);
+        chart.legend().position("top");
+        chart.legend().itemsLayout("horizontal");
+        
+        chart.container('timeProgressionChart');
+        chart.draw();
+      });
+      
+      // Set up dropdown event listeners
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts with first skill
+        initBarChart();
+        initPieChart();
+        
+        // Skill dropdown for bar chart
+        document.getElementById('skillDropdown').addEventListener('change', function() {
+          currentSkillIndex = parseInt(this.value);
+          document.getElementById('performanceSkillDropdown').value = currentSkillIndex;
+          initBarChart();
+          initPieChart();
+        });
+        
+        // Skill dropdown for pie chart (sync with bar chart dropdown)
+        document.getElementById('performanceSkillDropdown').addEventListener('change', function() {
+          currentSkillIndex = parseInt(this.value);
+          document.getElementById('skillDropdown').value = currentSkillIndex;
+          initBarChart();
+          initPieChart();
+        });
+      });
+      document.getElementById('skillDropdown').addEventListener('change', function() {
+  currentSkillIndex = parseInt(this.value);
+  initBarChart();
+});
+
+    </script>
+
+    <!-- Bootstrap Scripts -->
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    
+    <!-- Logout confirmation -->
+    <script>
+      function confirmLogout() {
+        return confirm("Are you sure you want to logout?");
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,160 @@
+<div class="chart-container">
+    <div class="chart-header">
+      <h2>Skill-wise Completion %</h2>
+    </div>
+  
+    <div class="bell-chart" id="bellChart"></div>
+    <div class="x-axis" id="xAxis"></div>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+  
+  <style>
+    .chart-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 40px 20px;
+      margin: 0 auto;
+    }
+  
+    .chart-header h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-top: 5px;
+      text-align: center;
+    }
+  
+    .bell-chart {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 300px;
+      position: relative;
+      margin-top: 80px;
+    }
+  
+    .bell {
+      position: relative;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .curve {
+      width: 100%;
+      border-radius: 20px 20px 0 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+  
+    .marker {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 10px;
+    }
+  
+    .x-axis {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+  
+    .x-axis-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-bottom: 6px;
+    }
+  
+    .x-axis-item p {
+      font-size: 0.9rem;
+      color: #444;
+      text-align: center;
+      max-width: 80px;
+    }
+  
+    .tooltip {
+      position: absolute;
+      background-color: #fff;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      border-radius: 5px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      display: none;
+      pointer-events: none;
+      z-index: 100;
+    }
+  </style>
+  
+  <script>
+    const data = <%- JSON.stringify(chartData) %>;
+    const bellChart = document.getElementById('bellChart');
+    const xAxis = document.getElementById('xAxis');
+    const tooltip = document.getElementById('tooltip');
+  
+    const colors = [
+      '#7BC6CC', '#A5D8DD', '#8ED1FC', '#C4E3E6',
+      '#D6F5F2', '#9BD9D9', '#A4E0EB', '#ADE6E6'
+    ];
+  
+    data.skills.forEach((skill, i) => {
+      const percentage = data.completionRates[i];
+      const color = colors[i % colors.length];
+  
+      const bell = document.createElement('div');
+      bell.className = 'bell';
+  
+      const marker = document.createElement('div');
+      marker.className = 'marker';
+      marker.style.backgroundColor = color;
+      marker.textContent = `${percentage.toFixed(1)}%`;
+  
+      const curve = document.createElement('div');
+      curve.className = 'curve';
+      curve.style.backgroundColor = color;
+      curve.style.height = `${percentage * 2.5}px`; // scale % to px (max height ~250)
+  
+      bell.appendChild(marker);
+      bell.appendChild(curve);
+      bellChart.appendChild(bell);
+  
+      const xItem = document.createElement('div');
+      xItem.className = 'x-axis-item';
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.backgroundColor = color;
+      const label = document.createElement('p');
+      label.textContent = skill;
+  
+      xItem.appendChild(dot);
+      xItem.appendChild(label);
+      xAxis.appendChild(xItem);
+  
+      bell.addEventListener('mouseenter', () => {
+        tooltip.innerHTML = `<strong>${skill}</strong>: ${percentage.toFixed(1)}% completed`;
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${bell.getBoundingClientRect().left + window.scrollX}px`;
+        tooltip.style.top = `${bell.getBoundingClientRect().top + window.scrollY - 40}px`;
+      });
+  
+      bell.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+    });
+  </script>

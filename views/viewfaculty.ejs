@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <title>View Forms Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      body {
+          background-color: #020230;
+          color: white; /* Ensuring text outside the container is visible */
+      }
+      .container {
+          background: #ffffff;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+          color: black !important; /* Forcing visible text */
+      }
+      h2 {
+          text-align: center;
+          margin-bottom: 20px;
+          color: black !important;
+      }
+      p, ul li, a {
+          color: black !important; /* Making sure all text inside is dark */
+          font-weight: 300;
+      }
+      a {
+  text-decoration: none;
+  color: #ffffff !important; /* Making links visible */
+}    
+/* Custom button styles */
+a.btn-custom {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff4646 !important; /* Current red color */
+  color: white !important;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover effect - Lighter red */
+a.btn-custom:hover {
+  background-color: #ff7b7b !important; /* Lighter red */
+  color: white !important;
+}
+
+  </style>
+  </head>
+
+  <body class="sub_page">
+    <div class="hero_area">
+      <!-- Header Section -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span>
+                <img src="/images/symbilogo.jpg" alt="Symbiosis Logo" style="width: 50px; height: auto" />
+              </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/faculty-dashboard"
+                    >Home <span class="sr-only">(current)</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewforms">Take Evaluation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/faculty/dashboard">Visualize Performance</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/studentdata">Student Data</a>
+                </li><li class="nav-item">
+                  <a class="nav-link" href="/facfeedback">Give Feedback</a>
+                </li>
+                
+                <!-- <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li> -->
+
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="facultyDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span id="facultyName">Loading...</span>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="facultyDropdown">
+                    <a class="dropdown-item text-danger" href="/logout"
+                    onclick="confirmLogout()">Logout</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Evaluation Form Section -->
+      <section class="about_section layout_padding">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="detail-box">
+                <div class="heading_container">
+                  <h2>Evaluation Form</h2>
+                </div>
+                <p>Select the evaluation form below to begin assessing student progress.</p>
+                <ul>
+                  <a href="/form" class="btn-custom">Access Evaluation</a>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Fetch Faculty Name Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const token = localStorage.getItem("auth_token");
+        const facultyNameElement = document.getElementById("facultyName");
+
+        if (!token) {
+          console.error("❌ No token found in localStorage");
+          facultyNameElement.textContent = "Unknown Faculty";
+          return;
+        }
+
+        try {
+          const response = await fetch("/getFacultyName", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+
+          facultyNameElement.textContent = response.ok ? data.facultyName : "Unknown Faculty";
+        } catch (error) {
+          console.error("❌ Error fetching faculty name:", error);
+          facultyNameElement.textContent = "Unknown Faculty";
+        }
+      });
+    </script>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>

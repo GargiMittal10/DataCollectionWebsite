@@ -1,0 +1,45 @@
+<div id="container" style="width: 100%; height: 500px;"></div>
+
+<!-- AnyChart Library -->
+<script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-base.min.js"></script>
+
+<script>
+  const skillLabels = <%- JSON.stringify(skills) %>; // X-axis: skill IDs
+  const chartData = <%- JSON.stringify(chartData) %>; // Each line: one session
+  const fixedColors = ['#F9CB9C', '	#B6D7A8', '#9AD3DA'];
+
+  function getData() {
+    const data = [];
+    for (let i = 0; i < skillLabels.length; i++) {
+      const row = [skillLabels[i]];
+      chartData.forEach(session => {
+        row.push(session.data[i]);
+      });
+      data.push(row);
+    }
+    return data;
+  }
+
+  anychart.onDocumentReady(function () {
+    const dataSet = anychart.data.set(getData());
+
+    const chart = anychart.line();
+    chart.animation(true);
+    chart.title("Time Progression Across Sessions");
+    chart.yAxis().title("Total Time (minutes)");
+    chart.xAxis().title("Skill ID");
+    chart.crosshair().enabled(true).yLabel(false).yStroke(null);
+    chart.legend().enabled(true);
+
+    chartData.forEach((session, index) => {
+      const seriesData = dataSet.mapAs({ x: 0, value: index + 1 });
+      const series = chart.line(seriesData);
+      series.name(session.label);
+      series.stroke(`3 ${session.borderColor}`);
+      series.tooltip().format(`${session.label} : {%value} mins`);
+    });
+
+    chart.container("container");
+    chart.draw();
+  });
+</script>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Performance Distribution</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+    }
+
+    .chart-container {
+      width: 80%;
+      max-width: 600px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2, p {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chart-container">
+    <h1>Student Performance Distribution</h1>
+    <h2><%= facultyName %> - <%= skillName %></h2>
+    <p>This chart represents the distribution of students based on their task completion rate.</p>
+
+    <canvas id="performanceChart"></canvas>
+  </div>
+
+  <script>
+    const data = {
+      excellent: <%= excellent %>,
+      good: <%= good %>,
+      average: <%= average %>,
+      poor: <%= poor %>
+    };
+
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Excellent (76-100%)', 'Good (51-75%)', 'Average (26-50%)', 'Poor (0-25%)'],
+        datasets: [{
+          data: [data.excellent, data.good, data.average, data.poor],
+          backgroundColor: ['#4CAF50', '#FF9800', '#FFC107', '#F44336'],
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return `${tooltipItem.label}: ${tooltipItem.raw} students`;
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

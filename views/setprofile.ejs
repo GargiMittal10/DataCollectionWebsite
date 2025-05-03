@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Set Profile</title>
+  <link rel="stylesheet" href="/css/login.css" />
+  <style>
+    * .container {
+    background-color: #ffffff;
+    padding: 40px 30px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h2 {
+    margin-bottom: 25px;
+    color: #020230;
+    font-size: 26px;
+    text-align: center;
+  }
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f5f5f5;
+    font-size: 15px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #020230;
+  }
+
+  .signup-btn {
+    background-color: #020230;
+    color: white;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .signup-btn:hover {
+    background-color: #1c1c6b;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Set Your Profile</h2>
+    <form id="setProfileForm">
+      <input type="text" id="name" placeholder="Your Full Name" required />
+      <input type="text" id="studentId" placeholder="Student ID" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+      <button type="submit" class="signup-btn">Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("setProfileForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const studentId = document.getElementById("studentId").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+      }
+
+      fetch("/set-profile", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, studentId, password })
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          localStorage.setItem("auth_token", data.token);
+          window.location.href = data.redirectUrl;
+        } else {
+          alert(data.error || "Something went wrong.");
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("An error occurred.");
+      });
+    });
+  </script>
+</body>
+</html>

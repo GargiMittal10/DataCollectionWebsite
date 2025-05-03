@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <title>Give Feedback</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+
+    <style>
+      body {
+        background-color: #020230;
+        color: white;
+      }
+      .iframe-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        padding: 20px;
+      }
+      iframe {
+        width: 100%;
+        max-width: 800px;
+        height: 600px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <span>
+              <img src="/images/symbilogo.jpg" alt="Logo" class="logo" style="width: 50px; height: auto" />
+            </span>
+            <a class="navbar-brand" href="/"> </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class=""> </span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/facultydash">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewforms">Take Evaluation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/faculty/dashboard">Visualize Performance</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/studentdata">Student Data</a>
+                </li><li class="nav-item">
+                  <a class="nav-link" href="/facfeedback">Give Feedback</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <section class="iframe-container">
+        <iframe 
+          src="https://docs.google.com/forms/d/e/1FAIpQLSeq309VXFunCkVB5v5MhnQLN7k6Deu6VVn5Fnat0ZwK5agJUA/viewform?usp=dialog"
+          allowfullscreen>
+        </iframe>
+      </section>
+    </div>
+
+    <footer class="footer_section">
+      <div class="container">
+        <p>&copy; <span id="displayYear"></span> All Rights Reserved.</p>
+      </div>
+    </footer>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+    <script>
+      function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          window.location.href = "/logout";
+        }
+      }
+    </script>
+  </body>
+</html>

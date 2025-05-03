@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Admin Dashboard - Add Faculty Data</title>
+    <!-- Corrected CSS paths -->
+    <link rel="stylesheet" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/coordinatordash">
+              <span
+                ><img
+                  src="/images/symbilogo.jpg"
+                  alt="Logo"
+                  class="logo"
+                  style="width: 50px; height: auto"
+              /></span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+            >
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <!-- <li class="nav-item">
+                  <a class="nav-link" href="/coordinatordash">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/mapping"
+                    >Student and form access</a
+                  >
+                </li> -->
+                <!-- <li class="nav-item">
+                  <a class="nav-link" href="/addfaculty">Add Faculty Data</a>
+                </li> -->
+                <li class="nav-item">
+                  <a class="nav-link" href="/admindash">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewfacultyadmin">Faculty List</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+
+    <section class="admin_section layout_padding">
+      <div class="container">
+        <div class="heading_container">
+          <h2>Add Faculty Data</h2>
+        </div>
+        <form id="facultyUploadForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="facultyFile">Upload Faculty List (Excel)</label>
+            <input
+              type="file"
+              class="form-control"
+              id="facultyFile"
+              name="facultyFile"
+              accept=".xls,.xlsx"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <a href="/viewfaculty" class="btn btn-secondary">View</a>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      document
+        .getElementById("facultyUploadForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault(); // Prevent page reload
+
+          const formData = new FormData(this);
+
+          try {
+            const response = await fetch("/upload-faculty", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.text();
+
+            if (response.ok) {
+              alert("✅ Upload submitted successfully!");
+            } else {
+              alert("❌ Error: " + result);
+            }
+          } catch (error) {
+            alert("❌ Network error, please try again.");
+            console.error("Upload error:", error);
+          }
+        });
+    </script>
+
+    <!-- Corrected JS paths -->
+    <!-- <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script> -->
+  </body>
+</html>

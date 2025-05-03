@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="icon" href="/images/symbilogo.jpg" type="image/gif" />
+    <title>Student Data Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/responsive.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #020230;
+        color: white;
+      }
+      .container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        color: black !important;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: black !important;
+      }
+      p,
+      ul li,
+      a,
+      label,
+      select,
+      option {
+        color: black !important;
+        font-weight: 300;
+      }
+      a {
+        text-decoration: none;
+        color: #ffffff !important;
+      }
+      a.btn-custom,
+      .btn-custom {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #ff4646 !important;
+        color: white !important;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+      }
+      a.btn-custom:hover,
+      .btn-custom:hover {
+        background-color: #ff7b7b !important;
+        color: white !important;
+      }
+      table.table {
+        background-color: white;
+      }
+      table.table th,
+      table.table td {
+        color: black;
+      }
+      .session-info {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        color: #333;
+        border-left: 4px solid #ff4646;
+      }
+      .form-control {
+        color: black !important;
+      }
+      .form-group label {
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body class="sub_page">
+    <div class="hero_area">
+      <!-- Header Section -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <span>
+                <img
+                  src="/images/symbilogo.jpg"
+                  alt="Symbiosis Logo"
+                  style="width: 50px; height: auto"
+                />
+              </span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+            >
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/faculty-dashboard"
+                    >Home <span class="sr-only">(current)</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/viewforms">Take Evaluation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/faculty/dashboard">Visualize Performance</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/studentdata">Student Data</a>
+                </li><li class="nav-item">
+                  <a class="nav-link" href="/facfeedback">Give Feedback</a>
+                </li>
+                
+                <!-- <li class="nav-item">
+                  <a class="nav-link" href="/update-questionaire">Update Questionaire</a>
+                </li> -->
+
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="facultyDropdown"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span id="facultyName">Loading...</span>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="facultyDropdown">
+                    <a class="dropdown-item text-danger" href="/logout"
+                    onclick="confirmLogout()">Logout</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <div class="container mt-5">
+        <!-- Header row with title and buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="mb-0">STUDENT DATA</h2>
+          <div>
+            <button id="editBtn" class="btn-custom mr-2">Edit</button>
+            <button id="saveChangesBtn" class="btn-custom" disabled>
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Skill Selection -->
+        <div class="form-group">
+          <label for="skillSelect">Select Skill:</label>
+          <select id="skillSelect" class="form-control">
+            <option value="" disabled selected>Loading skills...</option>
+          </select>
+        </div>
+
+        <!-- PRN Selection -->
+        <div class="form-group">
+          <label for="prnSelect">Select Student PRN:</label>
+          <select id="prnSelect" class="form-control" disabled>
+            <option value="" disabled selected>Select skill first</option>
+          </select>
+        </div>
+
+        <!-- Session Selection -->
+        <div class="form-group">
+          <label for="sessionSelect">Select Session:</label>
+          <select id="sessionSelect" class="form-control" disabled>
+            <option value="" disabled selected>Select student first</option>
+          </select>
+        </div>
+
+        <!-- Session Info Box -->
+        <div id="sessionInfo" class="session-info" style="display: none">
+          <strong>Session Information:</strong>
+          <div id="sessionDetails">
+            <!-- Session details will be displayed here -->
+          </div>
+        </div>
+
+        <!-- Updated Table with Qno column -->
+        <table class="table table-bordered table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>Student Name</th>
+              <th>Qno</th>
+              <th>Question</th>
+              <th>Answer</th>
+              <th>Conducted Date</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- Data will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          alert("Unauthorized access! Please log in.");
+          window.location.href = "/login";
+          return;
+        }
+
+        const skillSelect = document.getElementById("skillSelect");
+        const prnSelect = document.getElementById("prnSelect");
+        const sessionSelect = document.getElementById("sessionSelect");
+        const studentTableBody = document.getElementById("studentTableBody");
+        const saveChangesBtn = document.getElementById("saveChangesBtn");
+        const editBtn = document.getElementById("editBtn");
+        const sessionInfo = document.getElementById("sessionInfo");
+        const sessionDetails = document.getElementById("sessionDetails");
+        const today = new Date().toISOString().split("T")[0];
+
+        // Global editing mode flag
+        let editingMode = false;
+
+        // Update on Edit Button Click
+        editBtn.addEventListener("click", () => {
+            editingMode = true;
+            saveChangesBtn.disabled = false;
+            loadStudentDataForSession();
+          });
+
+
+        // Function to load and render the student data for editing
+        async function loadStudentDataForSession() {
+          const prn = prnSelect.value, skill = skillSelect.value, session = sessionSelect.value;
+          if (!prn || !skill || !session) return;
+
+          studentTableBody.innerHTML = "";
+          try {
+            let url = `/studentdata?prn=${prn}&skill=${skill}`;
+            if (session !== "all") url += `&session=${session}`;
+            const resp = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await resp.json();
+            if (data.filteredResults.length === 0) {
+              studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center">No data available</td></tr>`;
+              return;
+            }
+            sessionInfo.style.display = "block";
+            sessionDetails.innerHTML = session === "all"
+              ? `<p>Showing all sessions</p>`
+              : `<p>Session ${session}</p><p>Date: ${data.sessionInfo?.conducted_date || data.filteredResults[0].conducted_date}</p>
+                <p>Duration: ${data.sessionInfo?.totaltime || data.filteredResults[0].totaltime}</p>`;
+
+            data.filteredResults.forEach(student => renderStudentRow(student));
+          } catch (e) {
+            console.error("Error loading student data:", e);
+            studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error: ${e.message}</td></tr>`;
+            sessionInfo.style.display = "none";
+          }
+        }
+
+        // Render a single student row with editable fields for today’s data
+        function renderStudentRow(student) {
+            const answeredCell = editingMode
+              ? `<select class="answerSelect"
+                        data-student-id="${student.student_id}"
+                        data-question-id="${student.Qno}"
+                        data-skill-id="${skillSelect.value}"
+                        data-session="${student.session_no}"
+                        data-date="${student.conducted_date}">
+                  <option value="Completed" ${student.completed === "Completed" ? "selected":""}>Completed</option>
+                  <option value="Not Completed" ${student.completed === "Not Completed" ? "selected":""}>Not Completed</option>
+                </select>`
+              : (student.completed || "Not Completed");
+
+            studentTableBody.insertAdjacentHTML("beforeend", `
+              <tr>
+                <td>${student.student_name}</td>
+                <td>${student.Qno}</td>
+                <td>${student.Question || "N/A"}</td>
+                <td>${answeredCell}</td>
+                <td>${student.conducted_date}</td>
+              </tr>`);
+          }
+
+        async function fetchFacultyData() {
+          try {
+            const response = await fetch("/getFacultyName", {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await response.json();
+            document.getElementById("facultyName").textContent =
+              data.facultyName || "Faculty";
+          } catch (error) {
+            console.error("Error fetching faculty name:", error);
+            document.getElementById("facultyName").textContent =
+              "Error Loading";
+          }
+        }
+
+        async function fetchSkills() {
+          try {
+            const response = await fetch("/getFacultySkills", {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const skills = await response.json();
+            skillSelect.innerHTML =
+              '<option value="" disabled selected>Select Skill</option>';
+            skills.forEach((skill) => {
+              const option = document.createElement("option");
+              option.value = skill.skill_id;
+              option.textContent = skill.skill_name;
+              skillSelect.appendChild(option);
+            });
+          } catch (error) {
+            console.error("Error fetching faculty skills:", error);
+            skillSelect.innerHTML =
+              '<option value="" disabled>Error loading skills</option>';
+          }
+        }
+
+        skillSelect.addEventListener("change", async function () {
+          const selectedSkill = skillSelect.value;
+          if (!selectedSkill) return;
+          prnSelect.innerHTML =
+            '<option value="" disabled selected>Loading PRNs...</option>';
+          prnSelect.disabled = true;
+
+          // Reset session dropdown when skill changes
+          sessionSelect.innerHTML =
+            '<option value="" disabled selected>Select student first</option>';
+          sessionSelect.disabled = true;
+
+          // Clear any existing data
+          studentTableBody.innerHTML = "";
+          sessionInfo.style.display = "none";
+
+          try {
+            const response = await fetch(
+              `/getStudentsBySkill/${selectedSkill}`,
+              {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            const students = await response.json();
+            prnSelect.innerHTML =
+              '<option value="" disabled selected>Select PRN</option>';
+            students.forEach((student) => {
+              const option = document.createElement("option");
+              option.value = student.student_id;
+              option.textContent = `${student.student_name} (${student.student_id})`;
+              prnSelect.appendChild(option);
+            });
+
+            prnSelect.disabled = false;
+          } catch (error) {
+            console.error("Error fetching students:", error);
+            prnSelect.innerHTML =
+              '<option value="" disabled>Error loading PRNs</option>';
+          }
+        });
+
+        prnSelect.addEventListener("change", async function () {
+          editingMode = false; // Reset editing mode each time a new PRN is selected
+          saveChangesBtn.disabled = true;
+
+          const selectedPRN = prnSelect.value;
+          const selectedSkill = skillSelect.value;
+
+          if (!selectedPRN || !selectedSkill) return;
+
+          // Clear any existing data
+          studentTableBody.innerHTML = "";
+          sessionInfo.style.display = "none";
+
+          sessionSelect.innerHTML =
+            '<option value="" disabled selected>Loading sessions...</option>';
+          sessionSelect.disabled = true;
+
+          try {
+            // Fetch sessions for this student and skill
+            const response = await fetch(
+              `/getStudentSessions?prn=${selectedPRN}&skill=${selectedSkill}`,
+              {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+
+            const sessions = await response.json();
+
+            if (sessions.length === 0) {
+              sessionSelect.innerHTML =
+                '<option value="" disabled selected>No sessions available</option>';
+              return;
+            }
+
+            sessionSelect.innerHTML =
+              '<option value="" disabled selected>Select session</option>';
+            // Add "All Sessions" option
+            const allOption = document.createElement("option");
+            allOption.value = "all";
+            allOption.textContent = "All Sessions";
+            sessionSelect.appendChild(allOption);
+
+            // Add individual session options
+            sessions.forEach((session) => {
+              const option = document.createElement("option");
+              option.value = session.session_no;
+              option.textContent = `Session ${session.session_no} (${session.conducted_date})`;
+              sessionSelect.appendChild(option);
+            });
+
+            sessionSelect.disabled = false;
+          } catch (error) {
+            console.error("Error fetching sessions:", error);
+            sessionSelect.innerHTML =
+              '<option value="" disabled selected>Error loading sessions</option>';
+          }
+        });
+
+        sessionSelect.addEventListener("change", async function () {
+          editingMode = false; // Reset editing mode
+          saveChangesBtn.disabled = true;
+          await loadStudentDataForSession();
+        });
+
+        async function loadStudentDataForSession() {
+          const selectedPRN = prnSelect.value;
+          const selectedSkill = skillSelect.value;
+          const selectedSession = sessionSelect.value;
+
+          if (!selectedPRN || !selectedSkill || !selectedSession) return;
+
+          try {
+            // Clear previous data
+            studentTableBody.innerHTML = "";
+
+            // Build the URL with query parameters
+            let url = `/studentdata?prn=${selectedPRN}&skill=${selectedSkill}`;
+
+            // Add session parameter only if a specific session is selected
+            if (selectedSession !== "all") {
+              url += `&session=${selectedSession}`;
+            }
+
+            const response = await fetch(url, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const data = await response.json();
+
+            if (data.filteredResults.length === 0) {
+              sessionInfo.style.display = "none";
+              studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center">No student data available</td></tr>`;
+              return;
+            }
+
+            // Display session info box
+            sessionInfo.style.display = "block";
+
+            if (selectedSession === "all") {
+              // Group results by session_no for "All Sessions" view
+              sessionDetails.innerHTML = `<p>Showing all sessions for this student and skill</p>`;
+
+              // Group by session_no
+              const sessionGroups = {};
+              data.filteredResults.forEach((record) => {
+                const sessionNo = record.session_no;
+                if (!sessionGroups[sessionNo]) {
+                  sessionGroups[sessionNo] = {
+                    totaltime: parseFloat(record.totaltime) || 0,
+                    conducted_date: record.conducted_date,
+                    rows: [],
+                  };
+                }
+                sessionGroups[sessionNo].rows.push(record);
+              });
+
+              // Sort the session keys numerically descending
+              const sortedSessions = Object.keys(sessionGroups).sort(
+                (a, b) => parseInt(b) - parseInt(a)
+              );
+
+              // Render table rows for each session group
+              sortedSessions.forEach((sessionNo) => {
+                const group = sessionGroups[sessionNo];
+
+                // Add session header
+                const sessionHeader = `
+                  <tr style="background-color: #e6f7ff;">
+                    <td colspan="5" class="font-weight-bold">
+                      Session ${sessionNo} - ${group.conducted_date || "N/A"}
+                    </td>
+                  </tr>
+                `;
+                studentTableBody.insertAdjacentHTML("beforeend", sessionHeader);
+
+                // Add rows for this session
+                group.rows.forEach((student) => {
+                  renderStudentRow(student, group.conducted_date);
+                });
+
+                // Total Time Row (after each session group)
+                const totalRowHTML = `
+                  <tr style="font-weight: bold; background-color: #f9f9f9;">
+                    <td colspan="3">Total Time for Session ${sessionNo}</td>
+                    <td colspan="2">${group.totaltime.toFixed(2)} hours</td>
+                  </tr>
+                `;
+                studentTableBody.insertAdjacentHTML("beforeend", totalRowHTML);
+              });
+            } else {
+              // Display info for specific session
+              const sessionData = data.sessionInfo || {};
+              sessionDetails.innerHTML = `
+                <p>Session: ${selectedSession}</p>
+                <p>Date: ${
+                  sessionData.conducted_date ||
+                  data.filteredResults[0]?.conducted_date ||
+                  "N/A"
+                }</p>
+                <p>Duration: ${
+                  sessionData.totaltime ||
+                  data.filteredResults[0]?.totaltime ||
+                  "0"
+                } </p>
+              `;
+
+              // For specific session, just show the questions for that session
+              data.filteredResults.forEach((student) => {
+                renderStudentRow(student, student.conducted_date);
+              });
+
+              // Total time for specific session
+              if (data.filteredResults.length > 0) {
+                const totalTime =
+                  parseFloat(data.filteredResults[0].totaltime) || 0;
+                const totalRowHTML = `
+                  <tr style="font-weight: bold; background-color: #f9f9f9;">
+                    <td colspan="3">Total Time for Session ${selectedSession}</td>
+                    <td colspan="2">${sessionData.totaltime} hours</td>
+                  </tr>
+                `;
+                studentTableBody.insertAdjacentHTML("beforeend", totalRowHTML);
+              }
+            }
+          } catch (error) {
+            console.error("Error loading student data:", error);
+            studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading student data: ${error.message}</td></tr>`;
+            sessionInfo.style.display = "none";
+          }
+        }
+
+        function renderStudentRow(student, date) {
+          // Get question text and number
+          const questionText = student.Question || "Question not available";
+          const questionNumber = student.Qno || "N/A";
+
+          // Use completed field directly - no conversion to Yes/No
+          const answered = student.completed || "Not Completed";
+
+          // Render cell as dropdown if editingMode is enabled and date is today
+          let answeredCellContent;
+          if (editingMode && date === today) {
+            answeredCellContent = `
+              <select class="answerSelect" 
+                      data-student-id="${student.student_id}" 
+                      data-question-id="${student.Qno}" 
+                      data-skill-id="${skillSelect.value}" 
+                      data-session="${student.session_no}"
+                      data-skill-id="${skillSelect.value}"
+                      data-date="${student.conducted_date}">
+                <option value="Completed" ${
+                  answered === "Completed" ? "selected" : ""
+                }>Completed</option>
+                <option value="Not Completed" ${
+                  answered === "Not Completed" ? "selected" : ""
+                }>Not Completed</option>
+              </select>
+            `;
+          } else {
+            // Display the original value directly (Completed or Not Completed)
+            answeredCellContent = answered;
+          }
+
+          const rowHTML = `
+            <tr>
+              <td>${student.student_name}</td>
+              <td>${questionNumber}</td>
+              <td>${questionText}</td>
+              <td>${answeredCellContent}</td>
+              <td>${student.conducted_date}</td>
+            </tr>
+          `;
+
+          studentTableBody.insertAdjacentHTML("beforeend", rowHTML);
+        }
+
+        saveChangesBtn.addEventListener("click", async () => {
+          const selects = document.querySelectorAll(".answerSelect");
+          const updates = Array.from(selects).map(sel => ({
+            student_id: sel.dataset.studentId,
+            question_id: sel.dataset.questionId,
+            skill_id: sel.dataset.skillId,
+            session_no: sel.dataset.session,
+            conducted_date: sel.dataset.date,
+            completed: sel.value
+          }));
+
+          try {
+            const resp = await fetch("/updateStudentAnswers", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({ updates })
+            });
+
+            if (!resp.ok) {
+              // try to read the error message from the server
+              const errText = await resp.text();
+              console.error("Save failed:", resp.status, errText);
+              alert(`Failed to save changes (status ${resp.status})`);
+              return;
+            }
+
+            alert("Changes saved successfully!");
+            editingMode = false;
+            saveChangesBtn.disabled = true;
+            loadStudentDataForSession();
+          } catch (e) {
+            console.error("Error saving changes:", e);
+            alert("An error occurred while saving changes.");
+          }
+        });
+
+
+        // Initial load
+        fetchFacultyData();
+        fetchSkills();
+      });
+    </script>
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>

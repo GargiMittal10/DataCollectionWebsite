@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard</title>
+
+  <!-- Link to Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .chart-container {
+      width: 48%;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .chart-header h2 {
+      font-size: 1.8rem;
+      color: #333;
+    }
+
+    .kpi-wrapper {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    .kpi-box {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      width: 48%;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .kpi-box p {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .summary-box {
+      background-color: #f9f9f9;
+      border-left: 5px solid #4CAF50;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Faculty Dashboard Performance Visualization</h1>
+  
+  <div class="kpi-wrapper">
+    <div class="kpi-box">
+      <h3>Total Students Evaluated</h3>
+      <p id="totalStudents">0</p>
+    </div>
+    <div class="kpi-box">
+      <h3>Total Skills Evaluated</h3>
+      <p id="totalSkills">0</p>
+    </div>
+    <div class="kpi-box">
+      <h3>Average Completion Rate</h3>
+      <p id="avgCompletionRate">0%</p>
+    </div>
+    <div class="kpi-box">
+      <h3>Average Time Taken</h3>
+      <p id="avgTimeTaken">0 minutes</p>
+    </div>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <h3>Real-time Summary</h3>
+    <ul id="summaryList"></ul>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="chart-container">
+      <div class="chart-header">
+        <h2>Time Distribution Across Skills</h2>
+      </div>
+      <canvas id="timeDistributionChart" height="400"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-header">
+        <h2>Skill-wise Completion %</h2>
+      </div>
+      <canvas id="completionChart" height="400"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Sample data (Replace this with your dynamic data)
+    const chartData = [
+      { skill_id: 1, total_time: 50, session_no: 1 },
+      { skill_id: 1, total_time: 60, session_no: 2 },
+      { skill_id: 2, total_time: 40, session_no: 1 },
+      { skill_id: 2, total_time: 55, session_no: 2 },
+      // Add more data as required
+    ];
+
+    let totalStudents = 20;
+    let totalSkills = 5;
+    let avgCompletionRate = 85; // Example: 85% completion
+    let avgTimeTaken = 45; // Example: 45 minutes on average
+
+    document.getElementById('totalStudents').textContent = totalStudents;
+    document.getElementById('totalSkills').textContent = totalSkills;
+    document.getElementById('avgCompletionRate').textContent = avgCompletionRate + '%';
+    document.getElementById('avgTimeTaken').textContent = avgTimeTaken + ' minutes';
+
+    // Prepare the data for the Time Distribution Chart (Boxplot equivalent)
+    const skillTimesMap = {};
+    chartData.forEach(entry => {
+      const skill = entry.skill_id;
+      const time = entry.total_time;
+      if (!skillTimesMap[skill]) {
+        skillTimesMap[skill] = [];
+      }
+      skillTimesMap[skill].push(time);
+    });
+
+    const labels = Object.keys(skillTimesMap);
+    const datasets = Object.values(skillTimesMap).map(times => ({
+      label: 'Time for Skill ' + times[0], // Customize as needed
+      data: times,
+      fill: false,
+      borderColor: '#FF5733',
+      tension: 0.1
+    }));
+
+    const timeDistributionChart = new Chart(document.getElementById('timeDistributionChart'), {
+      type: 'boxplot', // This would typically be a custom chart type or a library extension
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: 'Skills' } },
+          y: { title: { display: true, text: 'Time (minutes)' } }
+        }
+      }
+    });
+
+    // Prepare the data for the Skill-wise Completion % chart
+    const skillCompletionRates = [
+      { skill_id: 1, completion_percentage: 80 },
+      { skill_id: 2, completion_percentage: 90 },
+      { skill_id: 3, completion_percentage: 85 },
+      { skill_id: 4, completion_percentage: 70 },
+      { skill_id: 5, completion_percentage: 95 }
+    ];
+
+    const completionChart = new Chart(document.getElementById('completionChart'), {
+      type: 'bar',
+      data: {
+        labels: skillCompletionRates.map(entry => `Skill ${entry.skill_id}`),
+        datasets: [{
+          label: 'Completion %',
+          data: skillCompletionRates.map(entry => entry.completion_percentage),
+          backgroundColor: '#7BC6CC'
+        }]
+      },
+      options: {
+        scales: {
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: 'Completion %' }
+          }
+        }
+      }
+    });
+
+    // Generate Summary dynamically
+    function generateSummary() {
+      const summaryList = document.getElementById('summaryList');
+      summaryList.innerHTML = `
+        <li>Total Sessions Evaluated: 10</li>
+        <li>Average Skill Completion: 85%</li>
+        <li>Time Taken for Completion: 45 minutes</li>
+      `;
+    }
+
+    generateSummary();
+  </script>
+</body>
+</html>
